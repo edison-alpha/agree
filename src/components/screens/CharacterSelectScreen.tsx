@@ -13,11 +13,17 @@ export const CharacterSelectScreen: React.FC<CharacterSelectScreenProps> = ({
   onSelect,
   onContinue,
 }) => (
-  <div className="absolute inset-0 z-[61] flex flex-col bg-[#111]/95 backdrop-blur-sm">
-    {/* Full-screen flex container — from top to bottom of viewport */}
-    <div className="flex h-full w-full flex-col px-4 py-5 sm:mx-auto sm:max-w-2xl sm:px-6 sm:py-8">
+  <div
+    className="absolute inset-0 z-[61] flex flex-col bg-[#111]/95 backdrop-blur-sm"
+    style={{
+      paddingBottom: 'max(12px, env(safe-area-inset-bottom, 12px))',
+      paddingTop: 'max(12px, env(safe-area-inset-top, 12px))',
+    }}
+  >
+    {/* Full-screen flex container */}
+    <div className="flex min-h-0 flex-1 flex-col px-4 sm:mx-auto sm:max-w-2xl sm:px-6">
       {/* Header — fixed size */}
-      <div className="shrink-0">
+      <div className="shrink-0 pt-2">
         <div className="mb-1 text-[10px] font-black uppercase tracking-[0.35em] text-yellow-400 sm:text-xs">
           Pilih Karakter
         </div>
@@ -27,15 +33,15 @@ export const CharacterSelectScreen: React.FC<CharacterSelectScreenProps> = ({
         </p>
       </div>
 
-      {/* Character cards — flex-1 fills all remaining space */}
-      <div className="mt-3 flex flex-1 flex-col gap-2 overflow-hidden sm:flex-row sm:gap-4">
+      {/* Character cards — flex-1 but min-h-0 prevents overflow */}
+      <div className="mt-2 flex min-h-0 flex-1 flex-col gap-2 sm:flex-row sm:gap-4">
         {CHARACTER_OPTIONS.map((character: CharacterOption) => {
           const isActive = character.id === selectedId;
           return (
             <button
               key={character.id}
               onClick={() => onSelect(character.id)}
-              className={`flex flex-1 flex-col overflow-hidden rounded-[20px] border-2 p-2 text-left transition active:scale-[0.98] sm:rounded-[28px] sm:p-3 ${
+              className={`flex min-h-0 flex-1 flex-col overflow-hidden rounded-[18px] border-2 p-2 text-left transition active:scale-[0.98] sm:rounded-[28px] sm:p-3 ${
                 isActive
                   ? 'border-yellow-400 bg-yellow-500/10 shadow-[0_0_0_1px_rgba(250,204,21,0.35)]'
                   : 'border-white/10 bg-white/5 hover:bg-white/10'
@@ -49,10 +55,10 @@ export const CharacterSelectScreen: React.FC<CharacterSelectScreenProps> = ({
                   className="h-full w-full object-contain"
                 />
               </div>
-              <div className="mt-1.5 shrink-0 text-sm font-black text-white sm:mt-2 sm:text-lg">
+              <div className="mt-1 shrink-0 text-sm font-black text-white sm:mt-2 sm:text-lg">
                 {character.name}
               </div>
-              <div className="shrink-0 text-[10px] leading-4 text-zinc-400 sm:text-sm">
+              <div className="shrink-0 text-[10px] leading-3 text-zinc-400 sm:text-sm">
                 {character.description}
               </div>
             </button>
@@ -60,13 +66,15 @@ export const CharacterSelectScreen: React.FC<CharacterSelectScreenProps> = ({
         })}
       </div>
 
-      {/* Button — fixed size, always at bottom */}
-      <button
-        onClick={onContinue}
-        className="mt-3 w-full shrink-0 rounded-2xl bg-yellow-500 py-3 text-sm font-black uppercase tracking-[0.22em] text-black transition hover:bg-yellow-400"
-      >
-        Lanjut ke Tutorial
-      </button>
+      {/* Button — always accessible at bottom */}
+      <div className="shrink-0 pb-1 pt-2">
+        <button
+          onClick={onContinue}
+          className="w-full rounded-2xl bg-yellow-500 py-2.5 text-sm font-black uppercase tracking-[0.22em] text-black transition hover:bg-yellow-400 sm:py-3"
+        >
+          Lanjut ke Tutorial
+        </button>
+      </div>
     </div>
   </div>
 );
