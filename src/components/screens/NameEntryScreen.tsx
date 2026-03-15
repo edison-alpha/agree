@@ -7,7 +7,12 @@ interface NameEntryScreenProps {
 }
 
 export const NameEntryScreen: React.FC<NameEntryScreenProps> = ({ playerName, onChange, onSubmit }) => (
-  <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+  <div
+    className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+    style={{
+      padding: 'max(16px, env(safe-area-inset-top, 16px)) max(16px, env(safe-area-inset-right, 16px)) max(16px, env(safe-area-inset-bottom, 16px)) max(16px, env(safe-area-inset-left, 16px))',
+    }}
+  >
     <div className="w-full max-w-sm rounded-[28px] border border-white/10 bg-[#171717]/95 p-5 text-center shadow-2xl sm:p-6">
       <div className="mb-4 text-xs font-black uppercase tracking-[0.35em] text-yellow-400">Profile Setup</div>
       <h1 className="mb-2 text-2xl font-black text-white sm:text-3xl">Enter your name</h1>

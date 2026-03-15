@@ -46,7 +46,12 @@ export const DialogueScreen: React.FC<DialogueScreenProps> = ({
       <div className="absolute inset-0 bg-black/20" />
       <div className="absolute inset-x-0 bottom-0 h-52 bg-gradient-to-t from-black/50 to-transparent" />
 
-      <div className="absolute inset-0 flex flex-col justify-end px-4 pb-24 pt-8 sm:px-8">
+      <div
+        className="absolute inset-0 flex flex-col justify-end px-4 pt-8 sm:px-8"
+        style={{
+          paddingBottom: 'max(64px, calc(64px + env(safe-area-inset-bottom, 0px)))',
+        }}
+      >
         <DialogueBubble
           message={messages[currentIndex]}
           playerName={playerName}
@@ -55,7 +60,12 @@ export const DialogueScreen: React.FC<DialogueScreenProps> = ({
           characterName={characterName}
         />
 
-        <div className="absolute bottom-3 left-0 right-0 flex items-center justify-between px-4 text-white sm:px-8">
+        <div
+          className="absolute inset-x-0 bottom-0 flex items-center justify-between px-4 text-white sm:px-8"
+          style={{
+            paddingBottom: 'max(12px, env(safe-area-inset-bottom, 12px))',
+          }}
+        >
           <div className="rounded-full bg-black/40 px-3 py-1 text-[11px] font-bold tracking-[0.25em] backdrop-blur-sm sm:text-xs">
             {currentIndex + 1}/{messages.length}
           </div>

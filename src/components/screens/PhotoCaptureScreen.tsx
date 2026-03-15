@@ -23,8 +23,13 @@ export const PhotoCaptureScreen: React.FC<PhotoCaptureScreenProps> = ({
   onRetake,
   onContinue,
 }) => (
-  <div className="absolute inset-0 z-[60] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
-    <div className="w-full max-w-md rounded-[32px] border border-white/10 bg-[#171717]/95 p-5 shadow-2xl sm:p-6">
+  <div
+    className="absolute inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+    style={{
+      padding: 'max(16px, env(safe-area-inset-top, 16px)) max(16px, env(safe-area-inset-right, 16px)) max(16px, env(safe-area-inset-bottom, 16px)) max(16px, env(safe-area-inset-left, 16px))',
+    }}
+  >
+    <div className="flex max-h-full w-full max-w-md flex-col rounded-[32px] border border-white/10 bg-[#171717]/95 p-5 shadow-2xl sm:p-6">
       <div className="mb-2 text-xs font-black uppercase tracking-[0.35em] text-yellow-400">Foto Profil</div>
       <h2 className="mb-2 text-2xl font-black text-white">Ciss foto dulu</h2>
       <p className="mb-5 text-sm leading-6 text-zinc-400">
@@ -32,7 +37,7 @@ export const PhotoCaptureScreen: React.FC<PhotoCaptureScreenProps> = ({
       </p>
 
       {/* Video always mounted so ref stays alive for retake */}
-      <div className="relative mx-auto mb-4 aspect-square w-full max-w-[320px] overflow-hidden rounded-[28px] border border-white/10 bg-zinc-900">
+      <div className="relative mx-auto mb-4 aspect-square w-full max-w-[280px] shrink-0 overflow-hidden rounded-[28px] border border-white/10 bg-zinc-900 sm:max-w-[320px]">
         <video
           ref={videoRef}
           autoPlay
@@ -58,7 +63,7 @@ export const PhotoCaptureScreen: React.FC<PhotoCaptureScreenProps> = ({
         </div>
       )}
 
-      <div className="flex flex-col gap-3">
+      <div className="mt-auto flex flex-col gap-3">
         {!profilePhoto ? (
           <button
             onClick={onCapture}

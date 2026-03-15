@@ -20,10 +20,17 @@ export const GameHUD: React.FC<GameHUDProps> = ({
   characterImage,
   characterName,
 }) => (
-  <div className="absolute top-0 left-0 w-full p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-gradient-to-b from-black/80 to-transparent pointer-events-none gap-2">
+  <div
+    className="pointer-events-none absolute left-0 top-0 flex w-full flex-col gap-2 bg-gradient-to-b from-black/80 to-transparent p-4 sm:flex-row sm:items-center sm:justify-between"
+    style={{
+      paddingTop: 'max(16px, env(safe-area-inset-top, 16px))',
+      paddingLeft: 'max(16px, env(safe-area-inset-left, 16px))',
+      paddingRight: 'max(16px, env(safe-area-inset-right, 16px))',
+    }}
+  >
     <div className="flex flex-col gap-1">
       <div className="text-2xl font-bold text-yellow-400 drop-shadow-md">SCORE: {score}</div>
-      <div className="flex items-center gap-3 bg-black/50 p-2 rounded-lg border border-zinc-700/50">
+      <div className="flex items-center gap-3 rounded-lg border border-zinc-700/50 bg-black/50 p-2">
         <ProfileAvatar
           photo={profilePhoto}
           fallbackSrc={characterImage}
