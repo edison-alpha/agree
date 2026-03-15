@@ -3,9 +3,10 @@
   "short_name": "SHOOTBAY",
   "description": "SHOOTBAY!!! adalah game action shooter dengan mode install full PWA.",
   "start_url": "/",
-  "display": "standalone",
-  "background_color": "#0f0f14",
-  "theme_color": "#0f0f14",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "orientation": "portrait-primary",
   "icons": [
     {

@@ -36,6 +36,19 @@ import { playSoundEffect } from './utils/audio';
 // App — thin orchestrator; all heavy lifting lives in hooks / engine
 // ═══════════════════════════════════════════════════════════════════════════
 export default function App() {
+  // ── Fullscreen API for mobile PWA ─────────────────────────────────
+  useEffect(() => {
+    const requestFullscreen = () => {
+      const el = document.documentElement;
+      if (document.fullscreenElement) return;
+      el.requestFullscreen?.().catch(() => {});
+      // Remove after first interaction
+      document.removeEventListener('pointerdown', requestFullscreen);
+    };
+    document.addEventListener('pointerdown', requestFullscreen, { once: true });
+    return () => document.removeEventListener('pointerdown', requestFullscreen);
+  }, []);
+
   // ── State machine ────────────────────────────────────────────────────
   const [gameState, setGameState] = useState<GameState>('intro');
   const [score, setScore] = useState(0);
@@ -194,7 +207,7 @@ export default function App() {
 
   // ── Render ───────────────────────────────────────────────────────────
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-zinc-900 text-white font-sans touch-none">
+    <div className="relative w-full h-[100dvh] overflow-hidden bg-black text-white font-sans touch-none">
       {/* Canvas (always mounted so the game loop ref stays alive) */}
       <canvas ref={canvasRef} className="absolute inset-0 block" />
 
@@ -222,6 +235,7 @@ export default function App() {
           cameraReady={camera.cameraReady}
           cameraError={camera.cameraError}
           onCapture={camera.capturePhoto}
+          onRetake={() => camera.setProfilePhoto(null)}
           onContinue={startGame}
         />
       )}

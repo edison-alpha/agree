@@ -8,6 +8,7 @@ interface PhotoCaptureScreenProps {
   cameraReady: boolean;
   cameraError: string;
   onCapture: () => void;
+  onRetake: () => void;
   onContinue: () => void;
 }
 
@@ -19,6 +20,7 @@ export const PhotoCaptureScreen: React.FC<PhotoCaptureScreenProps> = ({
   cameraReady,
   cameraError,
   onCapture,
+  onRetake,
   onContinue,
 }) => (
   <div className="absolute inset-0 z-[60] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
@@ -29,11 +31,21 @@ export const PhotoCaptureScreen: React.FC<PhotoCaptureScreenProps> = ({
         Izinkan akses kamera, lalu ambil foto. Hasil foto ini akan dipakai sebagai profile game untuk {playerName}.
       </p>
 
+      {/* Video always mounted so ref stays alive for retake */}
       <div className="relative mx-auto mb-4 aspect-square w-full max-w-[320px] overflow-hidden rounded-[28px] border border-white/10 bg-zinc-900">
-        {profilePhoto ? (
-          <img src={profilePhoto} alt="Profile preview" className="h-full w-full object-cover" />
-        ) : (
-          <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-cover scale-x-[-1]" />
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted
+          className={`h-full w-full scale-x-[-1] object-cover ${profilePhoto ? 'invisible' : ''}`}
+        />
+        {profilePhoto && (
+          <img
+            src={profilePhoto}
+            alt="Profile preview"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
         )}
         <div className="pointer-events-none absolute inset-0 rounded-[28px] border border-white/10 ring-1 ring-inset ring-white/10" />
       </div>
@@ -47,20 +59,30 @@ export const PhotoCaptureScreen: React.FC<PhotoCaptureScreenProps> = ({
       )}
 
       <div className="flex flex-col gap-3">
-        <button
-          onClick={onCapture}
-          disabled={!cameraReady}
-          className="w-full rounded-2xl border border-white/10 bg-white/8 py-3 text-sm font-black uppercase tracking-[0.2em] text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {profilePhoto ? 'Ambil Ulang Foto' : 'Ambil Foto'}
-        </button>
-        <button
-          onClick={onContinue}
-          disabled={!profilePhoto}
-          className="w-full rounded-2xl bg-yellow-500 py-3 text-sm font-black uppercase tracking-[0.22em] text-black transition hover:bg-yellow-400 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          Lanjutkan
-        </button>
+        {!profilePhoto ? (
+          <button
+            onClick={onCapture}
+            disabled={!cameraReady}
+            className="w-full rounded-2xl border border-white/10 bg-white/8 py-3 text-sm font-black uppercase tracking-[0.2em] text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Ambil Foto
+          </button>
+        ) : (
+          <>
+            <button
+              onClick={onRetake}
+              className="w-full rounded-2xl border border-white/10 bg-white/8 py-3 text-sm font-black uppercase tracking-[0.2em] text-white transition hover:bg-white/15"
+            >
+              Ambil Ulang Foto
+            </button>
+            <button
+              onClick={onContinue}
+              className="w-full rounded-2xl bg-yellow-500 py-3 text-sm font-black uppercase tracking-[0.22em] text-black transition hover:bg-yellow-400"
+            >
+              Lanjutkan
+            </button>
+          </>
+        )}
       </div>
     </div>
   </div>
