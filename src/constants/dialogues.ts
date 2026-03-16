@@ -2,44 +2,65 @@ import type { DialogueMessage } from '../types/game';
 
 /**
  * Build the opening dialogue sequence.
- * The player name is interpolated at call-time so the conversation
- * feels personalised.
+ * Updated for dimsum collection game flow:
+ * Levels → Collect Dimsum → Stars → Tickets → Mystery Box
  */
 export const buildOpeningDialogues = (playerName: string): DialogueMessage[] => [
   {
     speaker: 'Goblin Bay',
     side: 'left',
-    text: `Hoi ${playerName || 'petualang'}! Akhirnya kamu datang juga ke markas Goblin Bay.`,
+    text: `Hoi ${playerName || 'petualang'}! Selamat datang di Dimsum Dash — arena pertarungan Goblin Bay!`,
   },
   {
     speaker: 'Player',
     side: 'right',
-    text: `Aku ${playerName || 'petualang'}. Aku sudah siap, Goblin!`,
+    text: `Hai Goblin! Aku ${playerName || 'petualang'}. Apa yang harus aku lakukan di sini?`,
   },
   {
     speaker: 'Goblin Bay',
     side: 'left',
-    text: 'Bagus. Foto yang barusan kamu ambil akan kupakai sebagai profil petarungmu di game ini.',
+    text: 'Misimu sederhana: lawan goblin, kumpulkan semua dimsum 🥟 di setiap level! Ada 6 level menantang yang harus kamu taklukkan.',
   },
   {
     speaker: 'Player',
     side: 'right',
-    text: 'Mantap, berarti karakterku bakal tampil lebih keren.',
+    text: 'Dimsum? Jadi aku harus mengumpulkan dimsum sambil bertarung?',
   },
   {
     speaker: 'Goblin Bay',
     side: 'left',
-    text: 'Setelah ini goblin akan berdatangan. Setiap point milestone tercapai, kamu akan diminta memasukkan wish. Kalau score-mu tembus 1703, ada mystery box spesial menunggumu.',
+    text: 'Tepat! Setiap level punya sejumlah dimsum yang tersebar di arena. Kumpulkan semua untuk mendapat ⭐ 3 bintang! Kamu juga bisa dapat 1 atau 2 bintang tergantung berapa banyak dimsum yang dikumpulkan.',
   },
   {
     speaker: 'Player',
     side: 'right',
-    text: 'Siap. Tunjukkan dulu tutorial main di HP, lalu aku lanjut ngobrol sebentar sebelum mulai bertarung!',
+    text: 'Lalu dimsum yang terkumpul bisa dipakai untuk apa?',
+  },
+  {
+    speaker: 'Goblin Bay',
+    side: 'left',
+    text: 'Setiap 6 dimsum yang kamu kumpulkan akan otomatis menjadi 1 🎫 Ticket! Ticket bisa digunakan untuk membuka Mystery Box dengan memasukkan kode rahasia.',
+  },
+  {
+    speaker: 'Player',
+    side: 'right',
+    text: 'Mystery Box? Ada apa di dalamnya?',
+  },
+  {
+    speaker: 'Goblin Bay',
+    side: 'left',
+    text: 'Di dalam Mystery Box ada berbagai hadiah menarik — bisa berupa item spesial, bonus dimsum, kosmetik, atau bahkan Lucky Spin untuk hadiah fisik! Semuanya tergantung kode yang kamu masukkan. 🎁',
+  },
+  {
+    speaker: 'Player',
+    side: 'right',
+    text: 'Keren! Aku sudah tidak sabar. Ayo mulai petualangannya!',
   },
 ];
 
 /**
- * Build the milestone-reached dialogue.
+ * Build the level-complete dialogue.
+ * Shown when player finishes a level (replaces old milestone dialogue).
  */
 export const buildMilestoneDialogues = (
   playerName: string,
@@ -48,11 +69,11 @@ export const buildMilestoneDialogues = (
   {
     speaker: 'Goblin Bay',
     side: 'left',
-    text: `Hebat, ${playerName || 'petualang'}! Score kamu sudah mencapai ${milestone} point.`,
+    text: `Luar biasa, ${playerName || 'petualang'}! Kamu berhasil menyelesaikan level ${milestone}!`,
   },
   {
     speaker: 'Player',
     side: 'right',
-    text: 'Siap, aku lanjut. Sekarang aku mau isi wish dulu sebelum bertarung lagi.',
+    text: 'Asyik! Aku sudah mengumpulkan banyak dimsum. Ayo lanjut ke level berikutnya!',
   },
 ];
