@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
-import type { CharacterId, DialogueMessage, GameState } from './types/game';
+import type { ActivePowerUp, CharacterId, DialogueMessage, GameState } from './types/game';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 import { GAME_CONFIG } from './constants/config';
@@ -53,6 +53,9 @@ export default function App() {
   const [gameState, setGameState] = useState<GameState>('intro');
   const [score, setScore] = useState(0);
   const [health, setHealth] = useState(GAME_CONFIG.playerMaxHealth);
+  const [lives, setLives] = useState(GAME_CONFIG.playerLives);
+  const [weapon, setWeapon] = useState<string>('default');
+  const [powerUps, setPowerUps] = useState<ActivePowerUp[]>([]);
   const [playerName, setPlayerName] = useState('');
   const [currentWishMilestone, setCurrentWishMilestone] = useState(0);
   const [wishInput, setWishInput] = useState('');
@@ -97,6 +100,7 @@ export default function App() {
   // ── Physics event handlers (stable refs via useCallback) ────────────
   const onScoreChange = useCallback((s: number) => setScore(s), []);
   const onHealthChange = useCallback((h: number) => setHealth(h), []);
+  const onLivesChange = useCallback((l: number) => setLives(l), []);
 
   const onGameOver = useCallback(() => {
     setGameState('gameover');
@@ -124,10 +128,21 @@ export default function App() {
   useGameLoop(canvasRef, gameRef, {
     onScoreChange,
     onHealthChange,
+    onLivesChange,
     onGameOver,
     onMilestone,
     onBirthday,
   });
+
+  // ── Sync weapon/powerUps from gameRef to React state for HUD ──────
+  useEffect(() => {
+    if (gameState !== 'playing') return;
+    const interval = setInterval(() => {
+      setWeapon(gameRef.current.weapon);
+      setPowerUps([...gameRef.current.powerUps]);
+    }, 200);
+    return () => clearInterval(interval);
+  }, [gameState]);
 
   // ── Transition helpers ───────────────────────────────────────────────
   const continueFromName = () => {
@@ -152,8 +167,9 @@ export default function App() {
     const trimmed = playerName.trim();
     if (!trimmed) return;
     if (trimmed !== playerName) setPlayerName(trimmed);
-    gameRef.current.player.x = window.innerWidth / 2;
-    gameRef.current.player.y = window.innerHeight / 2;
+    // Player starts at map centre
+    gameRef.current.player.x = GAME_CONFIG.mapWidth / 2;
+    gameRef.current.player.y = GAME_CONFIG.mapHeight / 2;
     setGameState('playing');
     gameRef.current.state = 'playing';
     audio.startBackgroundMusic();
@@ -191,6 +207,9 @@ export default function App() {
     resetGameSnapshot(gameRef.current);
     setScore(0);
     setHealth(GAME_CONFIG.playerMaxHealth);
+    setLives(GAME_CONFIG.playerLives);
+    setWeapon('default');
+    setPowerUps([]);
     setCurrentWishMilestone(0);
     setWishes([]);
     setWishInput('');
@@ -298,6 +317,9 @@ export default function App() {
         <GameHUD
           score={score}
           health={health}
+          lives={lives}
+          weapon={weapon}
+          powerUps={powerUps}
           playerName={playerName}
           profilePhoto={camera.profilePhoto}
           characterImage={selectedCharacter.image}

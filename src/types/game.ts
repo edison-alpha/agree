@@ -52,6 +52,8 @@ export interface Bullet {
   vx: number;
   vy: number;
   radius: number;
+  damage: number;
+  fromTurret?: boolean; // true if fired by a turret
 }
 
 export type MinionType = 'normal' | 'elite';
@@ -75,6 +77,41 @@ export interface Particle {
   vx: number;
   vy: number;
   life: number;
+  color?: string;
+}
+
+// ─── Turrets (destructible structures) ──────────────────────────────────────
+export interface Turret {
+  x: number;
+  y: number;
+  radius: number;
+  health: number;
+  maxHealth: number;
+  lastShot: number;
+  range: number;
+  fireRate: number;
+  damage: number;
+  scoreValue: number;
+}
+
+// ─── Pickups ────────────────────────────────────────────────────────────────
+export type PickupType = 'heart' | 'weapon_shotgun' | 'weapon_rapid' | 'powerup_double';
+
+export interface Pickup {
+  x: number;
+  y: number;
+  radius: number;
+  type: PickupType;
+  life: number; // despawn timer (seconds remaining)
+}
+
+// ─── Weapons ────────────────────────────────────────────────────────────────
+export type WeaponType = 'default' | 'shotgun' | 'rapid';
+
+// ─── Active Power-ups ───────────────────────────────────────────────────────
+export interface ActivePowerUp {
+  type: 'double_bullets';
+  remaining: number; // seconds left
 }
 
 // ─── Input State ────────────────────────────────────────────────────────────
@@ -93,14 +130,26 @@ export interface MouseState {
   down: boolean;
 }
 
+// ─── Camera ─────────────────────────────────────────────────────────────────
+export interface Camera {
+  x: number;
+  y: number;
+}
+
 // ─── Game Snapshot (mutable ref for the game loop) ──────────────────────────
 export interface GameSnapshot {
   score: number;
   health: number;
+  lives: number;
   player: Player;
   bullets: Bullet[];
   minions: Minion[];
   particles: Particle[];
+  turrets: Turret[];
+  pickups: Pickup[];
+  powerUps: ActivePowerUp[];
+  weapon: WeaponType;
+  camera: Camera;
   keys: Record<string, boolean>;
   mouse: MouseState;
   joysticks: {
@@ -110,6 +159,7 @@ export interface GameSnapshot {
   lastShot: number;
   lastSpawn: number;
   lastDamage: number;
+  lastPickupSpawn: number;
   images: Record<string, HTMLImageElement>;
   audio: Record<string, HTMLAudioElement>;
   milestoneIndex: number;
