@@ -9,7 +9,7 @@ export const buildOpeningDialogues = (playerName: string): DialogueMessage[] => 
   {
     speaker: 'Goblin Bay',
     side: 'left',
-    text: `Hoi ${playerName || 'petualang'}! Selamat datang di Dimsum Dash — arena pertarungan Goblin Bay!`,
+    text: `Hoi ${playerName || 'petualang'}! Selamat datang — arena pertarungan Goblin Bay!`,
   },
   {
     speaker: 'Player',

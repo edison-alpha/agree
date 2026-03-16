@@ -33,7 +33,7 @@ export const TutorialScreen: React.FC<TutorialScreenProps> = ({ onContinue }) =>
       <h2 className="mb-3 shrink-0 text-lg font-black text-amber-100 sm:text-xl"
         style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}
       >
-        Cara Bermain Dimsum Dash
+        Cara Bermain
       </h2>
 
       {/* Content */}
