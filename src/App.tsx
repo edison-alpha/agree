@@ -194,10 +194,10 @@ export default function App() {
 
   const submitWish = () => {
     const trimmed = wishInput.trim();
-    if (trimmed) {
-      setWishes((prev) => [...prev, trimmed]);
-      setWishInput('');
-    }
+    // MANDATORY: must write a wish (min 3 chars) before continuing
+    if (trimmed.length < 3) return;
+    setWishes((prev) => [...prev, trimmed]);
+    setWishInput('');
     setGameState('playing');
     gameRef.current.state = 'playing';
     audio.startBackgroundMusic();

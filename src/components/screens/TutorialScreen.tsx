@@ -13,26 +13,44 @@ export const TutorialScreen: React.FC<TutorialScreenProps> = ({ onContinue }) =>
   >
     <div className="flex max-h-full w-full max-w-lg flex-col overflow-hidden rounded-[32px] border border-white/10 bg-[#171717]/95 p-5 text-white shadow-2xl sm:p-7">
       <div className="mb-2 shrink-0 text-xs font-black uppercase tracking-[0.35em] text-yellow-400">Tutorial</div>
-      <h2 className="mb-4 shrink-0 text-xl font-black sm:mb-5 sm:text-2xl">Tutorial main di HP</h2>
+      <h2 className="mb-4 shrink-0 text-xl font-black sm:mb-5 sm:text-2xl">Cara Bermain</h2>
 
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto text-sm leading-6 text-zinc-300 sm:space-y-4 sm:text-base">
         <div className="rounded-2xl border border-white/10 bg-white/5 p-3 sm:p-4">
-          <div className="mb-1 font-black uppercase tracking-[0.2em] text-white">Gerak</div>
+          <div className="mb-1 flex items-center gap-2 font-black uppercase tracking-[0.2em] text-white">
+            <span>👆</span> Gerak
+          </div>
           <p>Sentuh dan tahan sisi kiri layar untuk menggerakkan karaktermu ke segala arah.</p>
         </div>
         <div className="rounded-2xl border border-white/10 bg-white/5 p-3 sm:p-4">
-          <div className="mb-1 font-black uppercase tracking-[0.2em] text-white">Serang</div>
-          <p>Sentuh sisi kanan layar untuk membidik dan menembak goblin yang mendekat.</p>
+          <div className="mb-1 flex items-center gap-2 font-black uppercase tracking-[0.2em] text-white">
+            <span>🎯</span> Serang
+          </div>
+          <p>Sentuh sisi kanan layar untuk membidik dan menembak musuh yang mendekat.</p>
+        </div>
+        <div className="rounded-2xl border border-orange-500/20 bg-orange-500/5 p-3 sm:p-4">
+          <div className="mb-1 flex items-center gap-2 font-black uppercase tracking-[0.2em] text-orange-400">
+            <span>👹</span> Boss Enemy
+          </div>
+          <p>Boss kuat akan muncul setiap 250 poin! Mereka punya HP tinggi dan serangan dahsyat. Kalahkan untuk mendapat loot spesial.</p>
+        </div>
+        <div className="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-3 sm:p-4">
+          <div className="mb-1 flex items-center gap-2 font-black uppercase tracking-[0.2em] text-cyan-400">
+            <span>✨</span> Power-Up
+          </div>
+          <p>Kumpulkan item: ❤️ Health, 🛡️ Shield, 🏃 Speed, 💣 Shotgun, ⚡ Rapid Fire, 🪙 Coin bonus, ✨ Double Bullets.</p>
         </div>
         <div className="rounded-2xl border border-white/10 bg-white/5 p-3 sm:p-4">
-          <div className="mb-1 font-black uppercase tracking-[0.2em] text-white">Target</div>
-          <p>Jaga HP tetap aman, kumpulkan score, isi wish setiap milestone tercapai, dan kejar 1703 point untuk mendapatkan mystery box.</p>
+          <div className="mb-1 flex items-center gap-2 font-black uppercase tracking-[0.2em] text-white">
+            <span>🎯</span> Target
+          </div>
+          <p>Jaga HP, kumpulkan score, isi wish setiap milestone, dan kejar 1703 point untuk mendapatkan mystery box!</p>
         </div>
       </div>
 
       <button
         onClick={onContinue}
-        className="mt-4 w-full shrink-0 rounded-2xl bg-yellow-500 py-3 text-sm font-black uppercase tracking-[0.22em] text-black transition hover:bg-yellow-400 sm:mt-6"
+        className="mt-4 w-full shrink-0 rounded-2xl bg-yellow-500 py-3 text-sm font-black uppercase tracking-[0.22em] text-black transition hover:bg-yellow-400 active:scale-[0.98] sm:mt-6"
       >
         Lanjut ke Percakapan
       </button>

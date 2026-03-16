@@ -2,7 +2,274 @@ import React, { useEffect, useRef, useState } from 'react';
 import type { GameSnapshot, GameState } from '../types/game';
 import { ALL_ASSETS } from '../constants/assets';
 import { playIntroAudio } from '../utils/audio';
+
+// ── Local image imports ────────────────────────────────────────────────
 import goblinBayPng from '../assets/goblinbay.png';
+
+// ── Boss character sprites ─────────────────────────────────────────────
+// Viking Leader
+import bossVikingIdle from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Idle/Right - Idle_000.png';
+import bossVikingIdle1 from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Idle/Right - Idle_003.png';
+import bossVikingIdle2 from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Idle/Right - Idle_006.png';
+import bossVikingAttack from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Attacking/Right - Attacking_000.png';
+import bossVikingAttack1 from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Attacking/Right - Attacking_003.png';
+import bossVikingAttack2 from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Attacking/Right - Attacking_006.png';
+import bossVikingHurt from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Hurt/Right - Hurt_003.png';
+import bossVikingWalk from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Walking/Right - Walking_000.png';
+import bossVikingWalk1 from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Walking/Right - Walking_005.png';
+import bossVikingRun from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Running/Right - Running_000.png';
+
+// Giant Goblin
+import bossGoblinIdle from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Front - Idle/Front - Idle_000.png';
+import bossGoblinIdle1 from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Right - Idle/Right - Idle_000.png';
+import bossGoblinIdle2 from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Right - Idle/Right - Idle_005.png';
+import bossGoblinAttack from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Right - Attacking/Right - Attacking_000.png';
+import bossGoblinAttack1 from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Right - Attacking/Right - Attacking_003.png';
+import bossGoblinAttack2 from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Right - Attacking/Right - Attacking_006.png';
+import bossGoblinHurt from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Right - Hurt/Right - Hurt_003.png';
+import bossGoblinWalk from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Right - Walking/Right - Walking_000.png';
+import bossGoblinRun from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Right - Running/Right - Running_000.png';
+
+// Caveman Boss
+import bossCavemanIdle from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Idle/Right - Idle_000.png';
+import bossCavemanIdle1 from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Idle/Right - Idle_005.png';
+import bossCavemanIdle2 from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Idle/Right - Idle_010.png';
+import bossCavemanAttack from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Attacking/Right - Attacking_000.png';
+import bossCavemanAttack1 from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Attacking/Right - Attacking_003.png';
+import bossCavemanAttack2 from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Attacking/Right - Attacking_006.png';
+import bossCavemanHurt from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Hurt/Right - Hurt_003.png';
+import bossCavemanWalk from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Walking/Right - Walking_000.png';
+import bossCavemanRun from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Running/Right - Running_000.png';
+
+// ── Underwater pickup sprites ──────────────────────────────────────────
+import pickupHeart from '../assets/underwater/Bonus/Heart.png';
+import pickupShield from '../assets/underwater/Bonus/Shield.png';
+import pickupCoin from '../assets/underwater/Bonus/Coin.png';
+import pickupCrown from '../assets/underwater/Bonus/Crown.png';
+import pickupPearl from '../assets/underwater/Bonus/Pearl.png';
+import pickupAcceleration from '../assets/underwater/Bonus/Acceleration.png';
+import pickupSmallBomb from '../assets/underwater/Bonus/Small-bomb.png';
+import pickupMagnet from '../assets/underwater/Bonus/Magnet.png';
+
+// ── Mystery Box (Chest) ───────────────────────────────────────────────
+import chestClosed from '../assets/underwater/Neutral/\u00e6hest_closed.png';
+import chestAjar from '../assets/underwater/Neutral/\u00e6hest_ajar.png';
+import chestOpen from '../assets/underwater/Neutral/\u00e6hest_open.png';
+
+// ── Bubble sprites (score animation) ──────────────────────────────────
+import bubble1 from '../assets/underwater/Neutral/Bubble_1.png';
+import bubble2 from '../assets/underwater/Neutral/Bubble_2.png';
+import bubble3 from '../assets/underwater/Neutral/Bubble_3.png';
+
+// ── Underwater obstacles (map hazards & decoration) ───────────────────
+import obstacleStone1 from '../assets/underwater/Let/Stone_1.png';
+import obstacleStone2 from '../assets/underwater/Let/Stone_2.png';
+import obstacleStone3 from '../assets/underwater/Let/Stone_3.png';
+import obstacleStone4 from '../assets/underwater/Let/Stone_4.png';
+import obstacleStone5 from '../assets/underwater/Let/Stone_5.png';
+import obstacleStone6 from '../assets/underwater/Let/Stone_6.png';
+import obstacleBarrel1 from '../assets/underwater/Let/Barrel_1.png';
+import obstacleBarrel2 from '../assets/underwater/Let/Barrel_2.png';
+import obstacleBomb from '../assets/underwater/Let/Bomb.png';
+import obstacleAnchor from '../assets/underwater/Let/Anchor.png';
+import obstacleChain from '../assets/underwater/Let/Chain.png';
+import obstacleMast from '../assets/underwater/Let/Mast.png';
+import obstacleNet from '../assets/underwater/Let/Net.png';
+import obstacleSeaweed1 from '../assets/underwater/Let/Seaweed_1.png';
+import obstacleSeaweed2 from '../assets/underwater/Let/Seaweed_2.png';
+import obstacleSteeringWheel from '../assets/underwater/Let/Steering-wheel.png';
+
+// ── Fire/Water spell projectile frames ────────────────────────────────
+import fireBall1 from '../assets/water-fire-sprite-magic/Fire Ball/PNG/Fire Ball_Frame_01.png';
+import fireBall2 from '../assets/water-fire-sprite-magic/Fire Ball/PNG/Fire Ball_Frame_02.png';
+import fireBall3 from '../assets/water-fire-sprite-magic/Fire Ball/PNG/Fire Ball_Frame_03.png';
+import fireBall4 from '../assets/water-fire-sprite-magic/Fire Ball/PNG/Fire Ball_Frame_04.png';
+import fireBall5 from '../assets/water-fire-sprite-magic/Fire Ball/PNG/Fire Ball_Frame_05.png';
+import fireBall6 from '../assets/water-fire-sprite-magic/Fire Ball/PNG/Fire Ball_Frame_06.png';
+import fireBall7 from '../assets/water-fire-sprite-magic/Fire Ball/PNG/Fire Ball_Frame_07.png';
+import fireBall8 from '../assets/water-fire-sprite-magic/Fire Ball/PNG/Fire Ball_Frame_08.png';
+
+import waterBall1 from '../assets/water-fire-sprite-magic/Water Ball/PNG/Water Ball_Frame_01.png';
+import waterBall2 from '../assets/water-fire-sprite-magic/Water Ball/PNG/Water Ball_Frame_02.png';
+import waterBall3 from '../assets/water-fire-sprite-magic/Water Ball/PNG/Water Ball_Frame_03.png';
+import waterBall4 from '../assets/water-fire-sprite-magic/Water Ball/PNG/Water Ball_Frame_04.png';
+import waterBall5 from '../assets/water-fire-sprite-magic/Water Ball/PNG/Water Ball_Frame_05.png';
+import waterBall6 from '../assets/water-fire-sprite-magic/Water Ball/PNG/Water Ball_Frame_06.png';
+
+import fireArrow1 from '../assets/water-fire-sprite-magic/Fire Arrow/PNG/Fire Arrow_Frame_01.png';
+import fireArrow2 from '../assets/water-fire-sprite-magic/Fire Arrow/PNG/Fire Arrow_Frame_02.png';
+import fireArrow3 from '../assets/water-fire-sprite-magic/Fire Arrow/PNG/Fire Arrow_Frame_03.png';
+import fireArrow4 from '../assets/water-fire-sprite-magic/Fire Arrow/PNG/Fire Arrow_Frame_04.png';
+
+import waterArrow1 from '../assets/water-fire-sprite-magic/Water Arrow/PNG/Water Arrow_Frame_01.png';
+import waterArrow2 from '../assets/water-fire-sprite-magic/Water Arrow/PNG/Water Arrow_Frame_02.png';
+import waterArrow3 from '../assets/water-fire-sprite-magic/Water Arrow/PNG/Water Arrow_Frame_03.png';
+import waterArrow4 from '../assets/water-fire-sprite-magic/Water Arrow/PNG/Water Arrow_Frame_04.png';
+
+import waterSpell1 from '../assets/water-fire-sprite-magic/Water Spell/PNG/Water Spell_Frame_01.png';
+import waterSpell4 from '../assets/water-fire-sprite-magic/Water Spell/PNG/Water Spell_Frame_04.png';
+
+import fireSpell1 from '../assets/water-fire-sprite-magic/Fire Spell/PNG/Fire Spell_Frame_01.png';
+import fireSpell4 from '../assets/water-fire-sprite-magic/Fire Spell/PNG/Fire Spell_Frame_04.png';
+
+// ── Spell icons ──────────────────────────────────────────────────────
+import iconFireBall from '../assets/water-fire-sprite-magic/Icons/PNG/Icons_Fire Ball.png';
+import iconWaterBall from '../assets/water-fire-sprite-magic/Icons/PNG/Icons_Water Ball.png';
+import iconFireArrow from '../assets/water-fire-sprite-magic/Icons/PNG/Icons_Fire Arrow.png';
+import iconWaterArrow from '../assets/water-fire-sprite-magic/Icons/PNG/Icons_Water Arrow.png';
+import iconFireSpell from '../assets/water-fire-sprite-magic/Icons/PNG/Icons_Fire Spell.png';
+import iconWaterSpell from '../assets/water-fire-sprite-magic/Icons/PNG/Icons_Water Spell.png';
+
+// ── Energy effects ────────────────────────────────────────────────────
+import energy1 from '../assets/energy-pack/energy/1.png';
+import energy2 from '../assets/energy-pack/energy/2.png';
+import energy3 from '../assets/energy-pack/energy/3.png';
+import energy5 from '../assets/energy-pack/energy/5.png';
+import energy7 from '../assets/energy-pack/energy/7.png';
+import energy10 from '../assets/energy-pack/energy/10.png';
+import energy15 from '../assets/energy-pack/energy/15.png';
+import energy20 from '../assets/energy-pack/energy/20.png';
+import energy25 from '../assets/energy-pack/energy/25.png';
+import energy30 from '../assets/energy-pack/energy/30.png';
+import energy35 from '../assets/energy-pack/energy/35.png';
+import energy40 from '../assets/energy-pack/energy/40.png';
+import energy45 from '../assets/energy-pack/energy/45.png';
+import energy50 from '../assets/energy-pack/energy/50.png';
+
+// ── Local asset registry ──────────────────────────────────────────────
+const LOCAL_IMAGE_ASSETS: Record<string, string> = {
+  goblin_bay_local: goblinBayPng,
+
+  // ─── Boss Characters (multi-frame for animation) ───────────────────
+  boss_viking_idle: bossVikingIdle,
+  boss_viking_idle_1: bossVikingIdle1,
+  boss_viking_idle_2: bossVikingIdle2,
+  boss_viking_attack: bossVikingAttack,
+  boss_viking_attack_1: bossVikingAttack1,
+  boss_viking_attack_2: bossVikingAttack2,
+  boss_viking_hurt: bossVikingHurt,
+  boss_viking_walk: bossVikingWalk,
+  boss_viking_walk_1: bossVikingWalk1,
+  boss_viking_run: bossVikingRun,
+
+  boss_goblin_idle: bossGoblinIdle,
+  boss_goblin_idle_1: bossGoblinIdle1,
+  boss_goblin_idle_2: bossGoblinIdle2,
+  boss_goblin_attack: bossGoblinAttack,
+  boss_goblin_attack_1: bossGoblinAttack1,
+  boss_goblin_attack_2: bossGoblinAttack2,
+  boss_goblin_hurt: bossGoblinHurt,
+  boss_goblin_walk: bossGoblinWalk,
+  boss_goblin_run: bossGoblinRun,
+
+  boss_caveman_idle: bossCavemanIdle,
+  boss_caveman_idle_1: bossCavemanIdle1,
+  boss_caveman_idle_2: bossCavemanIdle2,
+  boss_caveman_attack: bossCavemanAttack,
+  boss_caveman_attack_1: bossCavemanAttack1,
+  boss_caveman_attack_2: bossCavemanAttack2,
+  boss_caveman_hurt: bossCavemanHurt,
+  boss_caveman_walk: bossCavemanWalk,
+  boss_caveman_run: bossCavemanRun,
+
+  // ─── Pickup sprites ────────────────────────────────────────────────
+  pickup_heart: pickupHeart,
+  pickup_shield: pickupShield,
+  pickup_coin: pickupCoin,
+  pickup_crown: pickupCrown,
+  pickup_pearl: pickupPearl,
+  pickup_acceleration: pickupAcceleration,
+  pickup_bomb: pickupSmallBomb,
+  pickup_magnet: pickupMagnet,
+
+  // ─── Mystery Box (Chest) ──────────────────────────────────────────
+  chest_closed: chestClosed,
+  chest_ajar: chestAjar,
+  chest_open: chestOpen,
+
+  // ─── Bubble sprites (score / point animation) ─────────────────────
+  bubble_1: bubble1,
+  bubble_2: bubble2,
+  bubble_3: bubble3,
+
+  // ─── Fire Ball projectile frames (animated) ───────────────────────
+  fire_ball_1: fireBall1,
+  fire_ball_2: fireBall2,
+  fire_ball_3: fireBall3,
+  fire_ball_4: fireBall4,
+  fire_ball_5: fireBall5,
+  fire_ball_6: fireBall6,
+  fire_ball_7: fireBall7,
+  fire_ball_8: fireBall8,
+
+  // ─── Water Ball projectile frames (animated) ──────────────────────
+  water_ball_1: waterBall1,
+  water_ball_2: waterBall2,
+  water_ball_3: waterBall3,
+  water_ball_4: waterBall4,
+  water_ball_5: waterBall5,
+  water_ball_6: waterBall6,
+
+  // ─── Fire Arrow frames ────────────────────────────────────────────
+  fire_arrow_1: fireArrow1,
+  fire_arrow_2: fireArrow2,
+  fire_arrow_3: fireArrow3,
+  fire_arrow_4: fireArrow4,
+
+  // ─── Water Arrow frames ───────────────────────────────────────────
+  water_arrow_1: waterArrow1,
+  water_arrow_2: waterArrow2,
+  water_arrow_3: waterArrow3,
+  water_arrow_4: waterArrow4,
+
+  // ─── Spell effects ────────────────────────────────────────────────
+  water_spell_1: waterSpell1,
+  water_spell_4: waterSpell4,
+  fire_spell_1: fireSpell1,
+  fire_spell_4: fireSpell4,
+
+  // ─── Spell icons ──────────────────────────────────────────────────
+  icon_fire_ball: iconFireBall,
+  icon_water_ball: iconWaterBall,
+  icon_fire_arrow: iconFireArrow,
+  icon_water_arrow: iconWaterArrow,
+  icon_fire_spell: iconFireSpell,
+  icon_water_spell: iconWaterSpell,
+
+  // ─── Energy effects (power-up visuals) ────────────────────────────
+  energy_1: energy1,
+  energy_2: energy2,
+  energy_3: energy3,
+  energy_5: energy5,
+  energy_7: energy7,
+  energy_10: energy10,
+  energy_15: energy15,
+  energy_20: energy20,
+  energy_25: energy25,
+  energy_30: energy30,
+  energy_35: energy35,
+  energy_40: energy40,
+  energy_45: energy45,
+  energy_50: energy50,
+
+  // ─── Map decorations & obstacles ──────────────────────────────────
+  obstacle_stone_1: obstacleStone1,
+  obstacle_stone_2: obstacleStone2,
+  obstacle_stone_3: obstacleStone3,
+  obstacle_stone_4: obstacleStone4,
+  obstacle_stone_5: obstacleStone5,
+  obstacle_stone_6: obstacleStone6,
+  obstacle_barrel_1: obstacleBarrel1,
+  obstacle_barrel_2: obstacleBarrel2,
+  obstacle_bomb: obstacleBomb,
+  obstacle_anchor: obstacleAnchor,
+  obstacle_chain: obstacleChain,
+  obstacle_mast: obstacleMast,
+  obstacle_net: obstacleNet,
+  obstacle_seaweed_1: obstacleSeaweed1,
+  obstacle_seaweed_2: obstacleSeaweed2,
+  obstacle_steering_wheel: obstacleSteeringWheel,
+};
 
 interface UseIntroLoaderResult {
   loadingProgress: number;
@@ -10,7 +277,7 @@ interface UseIntroLoaderResult {
 }
 
 /**
- * Orchestrates the intro screen: preloads all remote assets,
+ * Orchestrates the intro screen: preloads all remote + local assets,
  * plays the intro jingle, shows progress, then signals transition.
  */
 export function useIntroLoader(
@@ -48,7 +315,8 @@ export function useIntroLoader(
     // ── Asset loading ────────────────────────────────────────────────
     const imageEntries = Object.entries(ALL_ASSETS).filter(([, u]) => u.endsWith('.webp') || u.endsWith('.png'));
     const audioEntries = Object.entries(ALL_ASSETS).filter(([, u]) => u.endsWith('.mp3'));
-    const totalAssets = imageEntries.length + audioEntries.length;
+    const localEntries = Object.entries(LOCAL_IMAGE_ASSETS);
+    const totalAssets = imageEntries.length + audioEntries.length + localEntries.length;
     let loadedCount = 0;
 
     const bumpProgress = () => {
@@ -60,6 +328,7 @@ export function useIntroLoader(
       }
     };
 
+    // Load remote image assets
     imageEntries.forEach(([key, url]) => {
       const img = new Image();
       img.onload = bumpProgress;
@@ -68,11 +337,16 @@ export function useIntroLoader(
       gameRef.current.images[key] = img;
     });
 
-    // Load local Goblin Bay image for elite enemies in the canvas
-    const goblinLocal = new Image();
-    goblinLocal.src = goblinBayPng;
-    gameRef.current.images['goblin_bay_local'] = goblinLocal;
+    // Load all local image assets (bosses, pickups, spells, energy, obstacles)
+    localEntries.forEach(([key, url]) => {
+      const img = new Image();
+      img.onload = bumpProgress;
+      img.onerror = bumpProgress;
+      img.src = url;
+      gameRef.current.images[key] = img;
+    });
 
+    // Load audio assets
     audioEntries.forEach(([key, url]) => {
       const audio = new Audio(url);
       audio.addEventListener('canplaythrough', bumpProgress, { once: true });

@@ -53,10 +53,17 @@ export interface Bullet {
   vy: number;
   radius: number;
   damage: number;
-  fromTurret?: boolean; // true if fired by a turret
+  fromTurret?: boolean;
+  fromBoss?: boolean;
+  /** Visual type for projectile rendering */
+  visualType?: 'default' | 'fire' | 'water' | 'boss_fire' | 'fire_arrow' | 'water_arrow' | 'fire_spell' | 'water_spell';
+  /** Animation frame index for sprite-based bullets */
+  animFrame?: number;
+  /** Spawn time for animation timing */
+  spawnTime?: number;
 }
 
-export type MinionType = 'normal' | 'elite';
+export type MinionType = 'normal' | 'elite' | 'boss_viking' | 'boss_goblin' | 'boss_caveman';
 
 export interface Minion {
   x: number;
@@ -69,6 +76,18 @@ export interface Minion {
   damage: number;
   scoreValue: number;
   type: MinionType;
+  /** Animation frame index (for boss sprites) */
+  animFrame?: number;
+  /** Last attack timestamp (for boss ranged attacks) */
+  lastAttack?: number;
+  /** Boss state: 'idle' | 'charging' | 'attacking' | 'hurt' */
+  bossState?: 'idle' | 'charging' | 'attacking' | 'hurt';
+  /** Charge timer for boss dash attacks */
+  chargeTimer?: number;
+  /** Direction the boss is facing */
+  facingRight?: boolean;
+  /** Hurt flash timer */
+  hurtTimer?: number;
 }
 
 export interface Particle {
@@ -78,6 +97,21 @@ export interface Particle {
   vy: number;
   life: number;
   color?: string;
+  size?: number;       // start size (default 3)
+  sizeDecay?: number;  // shrink per second
+  glow?: boolean;      // render with additive glow
+  /** Optional image key for sprite-based particles */
+  spriteKey?: string;
+  /** Rotation angle for sprite particles */
+  rotation?: number;
+  /** Rotation speed */
+  rotationSpeed?: number;
+  /** Text to display (for score bubbles) */
+  text?: string;
+  /** Font size for text particles */
+  fontSize?: number;
+  /** Whether this is a score bubble particle */
+  isScoreBubble?: boolean;
 }
 
 // ─── Turrets (destructible structures) ──────────────────────────────────────
@@ -95,7 +129,16 @@ export interface Turret {
 }
 
 // ─── Pickups ────────────────────────────────────────────────────────────────
-export type PickupType = 'heart' | 'weapon_shotgun' | 'weapon_rapid' | 'powerup_double';
+export type PickupType =
+  | 'heart'
+  | 'weapon_shotgun'
+  | 'weapon_rapid'
+  | 'powerup_double'
+  | 'shield'
+  | 'speed_boost'
+  | 'coin'
+  | 'mystery_box'
+  | 'energy_pack';
 
 export interface Pickup {
   x: number;
@@ -103,6 +146,32 @@ export interface Pickup {
   radius: number;
   type: PickupType;
   life: number; // despawn timer (seconds remaining)
+  /** Float animation offset */
+  floatOffset?: number;
+  /** Mystery box state: closed → ajar → open */
+  chestState?: 'closed' | 'ajar' | 'open';
+  /** Timer for chest opening animation */
+  chestTimer?: number;
+  /** Energy pack variant (1-50) */
+  energyVariant?: number;
+}
+
+// ─── Map Obstacles (hazards) ────────────────────────────────────────────────
+export interface Obstacle {
+  x: number;
+  y: number;
+  radius: number;
+  type: 'bomb' | 'barrel' | 'stone' | 'net' | 'seaweed';
+  /** Sprite key for rendering */
+  spriteKey: string;
+  /** Damage dealt on collision */
+  damage: number;
+  /** Whether it destroys on impact */
+  destructible: boolean;
+  /** Health for destructible obstacles */
+  health?: number;
+  /** Whether already triggered */
+  triggered?: boolean;
 }
 
 // ─── Weapons ────────────────────────────────────────────────────────────────
@@ -110,7 +179,7 @@ export type WeaponType = 'default' | 'shotgun' | 'rapid';
 
 // ─── Active Power-ups ───────────────────────────────────────────────────────
 export interface ActivePowerUp {
-  type: 'double_bullets';
+  type: 'double_bullets' | 'shield' | 'speed_boost';
   remaining: number; // seconds left
 }
 
@@ -136,6 +205,14 @@ export interface Camera {
   y: number;
 }
 
+// ─── Screen Shake ───────────────────────────────────────────────────────────
+export interface ScreenShake {
+  intensity: number;  // current shake amplitude (pixels)
+  duration: number;   // time remaining (seconds)
+  offsetX: number;    // computed offset for this frame
+  offsetY: number;
+}
+
 // ─── Game Snapshot (mutable ref for the game loop) ──────────────────────────
 export interface GameSnapshot {
   score: number;
@@ -147,9 +224,11 @@ export interface GameSnapshot {
   particles: Particle[];
   turrets: Turret[];
   pickups: Pickup[];
+  obstacles: Obstacle[];
   powerUps: ActivePowerUp[];
   weapon: WeaponType;
   camera: Camera;
+  shake: ScreenShake;
   keys: Record<string, boolean>;
   mouse: MouseState;
   joysticks: {
@@ -160,8 +239,19 @@ export interface GameSnapshot {
   lastSpawn: number;
   lastDamage: number;
   lastPickupSpawn: number;
+  /** Boss spawn tracking */
+  lastBossSpawn: number;
+  bossesKilled: number;
   images: Record<string, HTMLImageElement>;
   audio: Record<string, HTMLAudioElement>;
   milestoneIndex: number;
   state: GameState;
+  /** Speed boost multiplier */
+  speedMultiplier: number;
+  /** Shield active flag */
+  shieldActive: boolean;
+  /** Last obstacle spawn time */
+  lastObstacleSpawn: number;
+  /** Total score animation bubbles tracker */
+  lastScoreBubble: number;
 }
