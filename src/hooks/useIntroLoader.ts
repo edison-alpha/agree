@@ -5,6 +5,10 @@ import { playIntroAudio } from '../utils/audio';
 
 // ── Local image imports ────────────────────────────────────────────────
 import goblinBayPng from '../assets/goblinbay.png';
+import charAgreePng from '../assets/agree.png';
+import charAgreedasterPng from '../assets/agreedaster.png';
+import charAgreeFront from '../assets/caractertentara.png';
+import charAgreedasterFront from '../assets/caracterdaster.png';
 
 // ── Boss character sprites ─────────────────────────────────────────────
 // Viking Leader
@@ -139,6 +143,17 @@ import energy50 from '../assets/energy-pack/energy/50.png';
 // ── Local asset registry ──────────────────────────────────────────────
 const LOCAL_IMAGE_ASSETS: Record<string, string> = {
   goblin_bay_local: goblinBayPng,
+
+  // ─── Default minion sprite (fallback for non-boss minions) ──────────
+  goblin_minion: goblinBayPng,
+
+  // ─── Player character sprites (selected at character select screen) ─
+  // Default trooper_character uses agree front-facing; overridden in beginGameplay()
+  trooper_character: charAgreeFront,
+  char_agree: charAgreePng,
+  char_agreedaster: charAgreedasterPng,
+  char_agree_front: charAgreeFront,
+  char_agreedaster_front: charAgreedasterFront,
 
   // ─── Boss Characters (multi-frame for animation) ───────────────────
   boss_viking_idle: bossVikingIdle,

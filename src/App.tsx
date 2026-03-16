@@ -170,6 +170,12 @@ export default function App() {
     // Player starts at map centre
     gameRef.current.player.x = GAME_CONFIG.mapWidth / 2;
     gameRef.current.player.y = GAME_CONFIG.mapHeight / 2;
+    // Set the player sprite to the SELECTED character's front-facing version
+    // caractertentara.png for 'agree', caracterdaster.png for 'agreedaster'
+    const charFrontKey = `char_${selectedCharacterId}_front`;
+    if (gameRef.current.images[charFrontKey]) {
+      gameRef.current.images.trooper_character = gameRef.current.images[charFrontKey];
+    }
     setGameState('playing');
     gameRef.current.state = 'playing';
     audio.startBackgroundMusic();

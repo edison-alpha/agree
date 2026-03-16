@@ -4,10 +4,8 @@
  */
 
 export const IMAGE_ASSETS = {
-  trooper_character:
-    'https://d2oir5eh8rty2e.cloudfront.net/assets/images/trooper_character_c313e52d-0cfb-4cdf-86a2-c260567995a2.webp',
-  goblin_minion:
-    'https://d2oir5eh8rty2e.cloudfront.net/assets/images/goblin_minion_83778b5f-6fcd-4212-b0b7-9d666754a94c.webp',
+  // trooper_character & goblin_minion removed – using local sprites instead
+  // (caractertentara.png / caracterdaster.png for player, boss-caracter/* for enemies)
   arena_background:
     'https://d2oir5eh8rty2e.cloudfront.net/assets/images/arena_background_342bb5c7-d769-4454-9b3d-4e0b3d9ec32d.webp',
   wish_card_background:
