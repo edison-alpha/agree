@@ -61,6 +61,7 @@ const PICKUP_SPRITE_MAP: Record<string, { imgKey: string; fallbackEmoji: string;
   speed_boost:    { imgKey: 'pickup_acceleration', fallbackEmoji: '🏃',  color: '#22c55e', glowColor: 'rgba(34, 197, 94, 0.5)' },
   coin:           { imgKey: 'pickup_coin',         fallbackEmoji: '🪙',  color: '#fbbf24', glowColor: 'rgba(251, 191, 36, 0.5)' },
   energy_pack:    { imgKey: 'energy_10',           fallbackEmoji: '⚡',  color: '#22d3ee', glowColor: 'rgba(34, 211, 238, 0.5)' },
+  dimsum:         { imgKey: 'pickup_dimsum',       fallbackEmoji: '🥟',  color: '#fbbf24', glowColor: 'rgba(251, 191, 36, 0.6)' },
 };
 
 // Boss animation frame keys

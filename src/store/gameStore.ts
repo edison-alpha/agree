@@ -21,18 +21,76 @@ export interface InventoryItem {
   icon: string;
   quantity: number;
   type: 'consumable' | 'cosmetic' | 'special';
+  redeemed?: boolean;
+  redeemedAt?: number;
 }
 
 export interface MysteryBoxReward {
   id: string;
-  type: 'birthday_card' | 'inventory_item' | 'dimsum_bonus' | 'cosmetic';
+  type: 'birthday_card' | 'inventory_item' | 'dimsum_bonus' | 'cosmetic' | 'spin_ticket';
   name: string;
   description: string;
   icon: string;
   message?: string; // For birthday cards
   value?: number;   // For dimsum_bonus amount
+  spins?: number;   // Number of spins for spin_ticket
   claimed: boolean;
   claimedAt?: number;
+}
+
+/** A single spin result from the spin wheel */
+export interface SpinResult {
+  prize: 'jam' | 'sepatu' | 'hilux' | 'baju' | 'dimsum';
+  name: string;
+  icon: string;
+  description: string;
+}
+
+/** Generate the rigged spin results: 2 dimsum + 1 random(baju/sepatu/jam) */
+export function generateSpinResults(): SpinResult[] {
+  const randomPrizes: SpinResult[] = [
+    { prize: 'jam', name: '⌚ Jam Tangan', icon: '⌚', description: 'Jam tangan eksklusif!' },
+    { prize: 'sepatu', name: '👟 Sepatu', icon: '👟', description: 'Sepatu keren untukmu!' },
+    { prize: 'baju', name: '👕 Baju', icon: '👕', description: 'Baju stylish untukmu!' },
+  ];
+  const randomPick = randomPrizes[Math.floor(Math.random() * randomPrizes.length)];
+
+  return [
+    { prize: 'dimsum', name: '🥟 Dimsum', icon: '🥟', description: '+2 Dimsum bonus!' },
+    { prize: 'dimsum', name: '🥟 Dimsum', icon: '🥟', description: '+2 Dimsum bonus!' },
+    randomPick,
+  ];
+}
+
+/** Apply spin results to the game data */
+export function applySpinResults(data: GameStoreData, results: SpinResult[]): GameStoreData {
+  let updated = { ...data };
+  const items: InventoryItem[] = [...updated.inventory];
+
+  for (const result of results) {
+    if (result.prize === 'dimsum') {
+      updated.totalDimsum += 2;
+    } else {
+      // Add to inventory
+      const existing = items.find(i => i.id === `spin_${result.prize}`);
+      if (existing) {
+        existing.quantity += 1;
+      } else {
+        items.push({
+          id: `spin_${result.prize}`,
+          name: result.name,
+          description: result.description,
+          icon: result.icon,
+          quantity: 1,
+          type: 'special',
+        });
+      }
+    }
+  }
+
+  updated.inventory = items;
+  saveGameData(updated);
+  return updated;
 }
 
 export interface LeaderboardEntry {
@@ -244,7 +302,21 @@ export function redeemCode(data: GameStoreData, code: string): { data: GameStore
 function generateMysteryReward(code: string): MysteryBoxReward {
   const upperCode = code.toUpperCase();
 
-  // Special birthday code — you can set your own code here
+  // ── Special Code: BAYUGANTENG → 3x Lucky Spin ──
+  if (upperCode === 'BAYUGANTENG') {
+    return {
+      id: `bayu_spin_${Date.now()}`,
+      type: 'spin_ticket',
+      name: '🎰 Lucky Spin x3',
+      description: 'You won 3 spins on the Lucky Wheel!',
+      icon: '🎰',
+      spins: 3,
+      claimed: true,
+      claimedAt: Date.now(),
+    };
+  }
+
+  // Special birthday codes (generic)
   if (upperCode.startsWith('BDAY') || upperCode.startsWith('HBD') || upperCode.startsWith('ULTAH')) {
     return {
       id: `bday_${Date.now()}`,
@@ -326,6 +398,21 @@ export function updateSettings(data: GameStoreData, settings: Partial<GameStoreD
     ...data,
     settings: { ...data.settings, ...settings },
   };
+  saveGameData(updated);
+  return updated;
+}
+
+// ─── Redeem Inventory Item ───────────────────────────────────────────────────
+
+export function redeemInventoryItem(data: GameStoreData, itemId: string): GameStoreData | null {
+  const item = data.inventory.find(i => i.id === itemId);
+  if (!item || item.redeemed) return null;
+
+  const updatedInventory = data.inventory.map(i =>
+    i.id === itemId ? { ...i, redeemed: true, redeemedAt: Date.now() } : i,
+  );
+
+  const updated = { ...data, inventory: updatedInventory };
   saveGameData(updated);
   return updated;
 }

@@ -17,22 +17,26 @@ interface MainMenuScreenProps {
   storeData: GameStoreData;
   playerName: string;
   profilePhoto: string | null;
+  characterImage?: string;
   onPlay: () => void;
   onLeaderboard: () => void;
   onInventory: () => void;
   onMysteryBox: () => void;
   onSettings: () => void;
+  onChangeCharacter: () => void;
 }
 
 export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
   storeData,
   playerName,
   profilePhoto,
+  characterImage,
   onPlay,
   onLeaderboard,
   onInventory,
   onMysteryBox,
   onSettings,
+  onChangeCharacter,
 }) => {
   const totalStars = getTotalStars(storeData);
   const maxStars = getMaxStars();
@@ -110,18 +114,34 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
             <img src={crownImg} alt="" className="w-20 h-20" />
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0"
-              style={{
-                border: '2px solid rgba(180,140,60,0.6)',
-                boxShadow: '0 0 10px rgba(180,140,60,0.2)',
-              }}
-            >
-              {profilePhoto ? (
-                <img src={profilePhoto} alt="" className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-amber-900 text-amber-300 font-black text-xl">
-                  {playerName.charAt(0).toUpperCase()}
-                </div>
+            <div className="relative flex-shrink-0">
+              <div className="w-14 h-14 rounded-xl overflow-hidden"
+                style={{
+                  border: '2px solid rgba(180,140,60,0.6)',
+                  boxShadow: '0 0 10px rgba(180,140,60,0.2)',
+                }}
+              >
+                {profilePhoto ? (
+                  <img src={profilePhoto} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-amber-900 text-amber-300 font-black text-xl">
+                    {playerName.charAt(0).toUpperCase()}
+                  </div>
+                )}
+              </div>
+              {/* Character icon overlay */}
+              {characterImage && (
+                <button onClick={onChangeCharacter}
+                  className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-full overflow-hidden transition active:scale-90"
+                  style={{
+                    border: '2px solid rgba(180,140,60,0.7)',
+                    background: 'rgba(62,40,20,0.95)',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.5)',
+                  }}
+                  title="Change Character"
+                >
+                  <img src={characterImage} alt="char" className="w-full h-full object-cover" />
+                </button>
               )}
             </div>
             <div className="flex-1 min-w-0">

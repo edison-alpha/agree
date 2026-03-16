@@ -60,6 +60,9 @@ import chestClosed from '../assets/underwater/Neutral/\u00e6hest_closed.webp';
 import chestAjar from '../assets/underwater/Neutral/\u00e6hest_ajar.webp';
 import chestOpen from '../assets/underwater/Neutral/\u00e6hest_open.webp';
 
+// ── Dimsum sprite ─────────────────────────────────────────────────────
+import dimsumSprite from '../assets/dimsum.png';
+
 // ── Bubble sprites (score animation) ──────────────────────────────────
 import bubble1 from '../assets/underwater/Neutral/Bubble_1.webp';
 import bubble2 from '../assets/underwater/Neutral/Bubble_2.webp';
@@ -196,6 +199,7 @@ const LOCAL_IMAGE_ASSETS: Record<string, string> = {
   pickup_acceleration: pickupAcceleration,
   pickup_bomb: pickupSmallBomb,
   pickup_magnet: pickupMagnet,
+  pickup_dimsum: dimsumSprite,
 
   // ─── Mystery Box (Chest) ──────────────────────────────────────────
   chest_closed: chestClosed,

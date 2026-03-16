@@ -21,6 +21,7 @@ import {
   createChestOpenEffect,
   createScoreBubble,
   createEnergyCollectEffect,
+  spawnLevelDimsum,
 } from './entities';
 import { playSoundEffect } from '../utils/audio';
 
@@ -31,6 +32,8 @@ export interface PhysicsEvents {
   onGameOver: () => void;
   onMilestone: (milestone: number) => void;
   onBirthday: () => void;
+  onDimsumCollected: (collected: number, total: number) => void;
+  onLevelComplete: () => void;
 }
 
 function triggerShake(state: GameSnapshot, intensity: number, duration: number) {
@@ -75,7 +78,23 @@ function handlePlayerDeath(state: GameSnapshot, time: number, events: PhysicsEve
   return false;
 }
 
+function checkDimsumCompletion(state: GameSnapshot, events: PhysicsEvents): boolean {
+  // Check if all dimsum collected → level complete
+  if (state.dimsumTotal > 0 && state.dimsumCollected >= state.dimsumTotal) {
+    state.minions.length = 0;
+    state.bullets.length = 0;
+    state.particles.length = 0;
+    state.state = 'levelComplete';
+    playSoundEffect(state.audio['milestone_sound']);
+    events.onLevelComplete();
+    return true;
+  }
+  return false;
+}
+
+/** Legacy score-based milestone check — kept for non-level gameplay fallback */
 function checkScoreMilestones(state: GameSnapshot, events: PhysicsEvents): boolean {
+  if (state.dimsumTotal > 0) return false; // Skip score milestones in level mode
   if (state.score >= GAME_CONFIG.finalGoal) {
     state.minions.length = 0;
     state.bullets.length = 0;
@@ -104,6 +123,13 @@ export function updatePhysics(
 ): void {
   const mw = GAME_CONFIG.mapWidth;
   const mh = GAME_CONFIG.mapHeight;
+
+  // ── Spawn level dimsum on first frame ─────────────────────────────
+  if (state.dimsumTotal > 0 && state.lastDimsumSpawn === 0) {
+    state.lastDimsumSpawn = time;
+    const dimsumPickups = spawnLevelDimsum(mw, mh, state.dimsumTotal, state.player.x, state.player.y);
+    state.pickups.push(...dimsumPickups);
+  }
 
   if (state.shake.duration > 0) {
     state.shake.duration -= dt;
@@ -322,10 +348,25 @@ export function updatePhysics(
     }
   }
 
-  // Pickup collection
+   // Pickup collection
   for (let i = state.pickups.length - 1; i >= 0; i--) {
     const p = state.pickups[i];
     if (Math.hypot(p.x - state.player.x, p.y - state.player.y) < p.radius + state.player.radius + 10) {
+      // ── Dimsum collection ─────────────────────────────────────────
+      if (p.type === 'dimsum') {
+        state.pickups.splice(i, 1);
+        state.dimsumCollected++;
+        state.score += 50; // Bonus score per dimsum
+        events.onScoreChange(state.score);
+        events.onDimsumCollected(state.dimsumCollected, state.dimsumTotal);
+        state.particles.push(...createPickupSparkle(p.x, p.y, '#fbbf24'));
+        state.particles.push(...createScoreBubble(p.x, p.y, `🥟 ${state.dimsumCollected}/${state.dimsumTotal}`));
+        triggerShake(state, 3, 0.1);
+        playSoundEffect(state.audio['pickup_sound']);
+        if (checkDimsumCompletion(state, events)) return;
+        continue;
+      }
+
       // Mystery box
       if (p.type === 'mystery_box') {
         if (p.chestState === 'closed') { p.chestState = 'ajar'; p.chestTimer = GAME_CONFIG.mysteryBoxOpenTime; continue; }

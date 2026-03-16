@@ -49,6 +49,7 @@ import { InventoryScreen } from './components/screens/InventoryScreen';
 import { MysteryBoxScreen } from './components/screens/MysteryBoxScreen';
 import { LevelCompleteScreen } from './components/screens/LevelCompleteScreen';
 import { SettingsScreen } from './components/screens/SettingsScreen';
+import { SpinWheelScreen } from './components/screens/SpinWheelScreen';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 import { playSoundEffect } from './utils/audio';
@@ -206,7 +207,44 @@ export default function App() {
   );
 
   const onBirthday = useCallback(() => {
-    // Level complete is now the primary endpoint
+    // Legacy: redirect to level complete
+    const timeElapsed = (performance.now() - levelStartTime) / 1000;
+    setLevelTimeElapsed(timeElapsed);
+    setDimsumCollected(gameRef.current.dimsumCollected);
+
+    const ticketsBefore = storeData.tickets;
+    setPreviousTickets(ticketsBefore);
+    const updated = saveLevelProgress(
+      storeData,
+      currentLevelId,
+      gameRef.current.dimsumCollected,
+      gameRef.current.dimsumTotal,
+      timeElapsed,
+    );
+
+    const finalData = addToLeaderboard(updated, {
+      playerName: playerName.trim(),
+      profilePhoto: camera.profilePhoto,
+      totalDimsum: updated.totalDimsum,
+      levelsCompleted: getCompletedLevels(updated),
+      totalStars: getTotalStars(updated),
+    });
+
+    setStoreData(finalData);
+    setGameState('levelComplete');
+    audio.stopBackgroundMusic();
+    playSoundEffect(gameRef.current.audio['victory_music']);
+  }, [audio, levelStartTime, storeData, currentLevelId, playerName, camera.profilePhoto]);
+
+  const onDimsumCollected = useCallback(
+    (collected: number, total: number) => {
+      setDimsumCollected(collected);
+      setDimsumTotal(total);
+    },
+    [],
+  );
+
+  const onLevelComplete = useCallback(() => {
     const timeElapsed = (performance.now() - levelStartTime) / 1000;
     setLevelTimeElapsed(timeElapsed);
     setDimsumCollected(gameRef.current.dimsumCollected);
@@ -243,6 +281,8 @@ export default function App() {
     onGameOver,
     onMilestone,
     onBirthday,
+    onDimsumCollected,
+    onLevelComplete,
   });
 
   // ── Transition helpers ───────────────────────────────────────────────
@@ -476,6 +516,7 @@ export default function App() {
           storeData={storeData}
           playerName={playerName}
           profilePhoto={camera.profilePhoto}
+          characterImage={selectedCharacter.image}
           onPlay={() => {
             setGameState('levelSelect');
             gameRef.current.state = 'levelSelect';
@@ -495,6 +536,10 @@ export default function App() {
           onSettings={() => {
             setGameState('settings');
             gameRef.current.state = 'settings';
+          }}
+          onChangeCharacter={() => {
+            setGameState('characterSelect');
+            gameRef.current.state = 'characterSelect';
           }}
         />
       )}
@@ -541,12 +586,29 @@ export default function App() {
             setGameState('mainMenu');
             gameRef.current.state = 'mainMenu';
           }}
+          onDataChange={(updated) => setStoreData(updated)}
         />
       )}
 
       {/* ── Mystery Box ──────────────────────────────────────────────── */}
       {gameState === 'mysteryBox' && (
         <MysteryBoxScreen
+          storeData={storeData}
+          onDataChange={setStoreData}
+          onBack={() => {
+            setGameState('mainMenu');
+            gameRef.current.state = 'mainMenu';
+          }}
+          onSpinWheel={() => {
+            setGameState('spinWheel');
+            gameRef.current.state = 'spinWheel';
+          }}
+        />
+      )}
+
+      {/* ── Spin Wheel ─────────────────────────────────────────────── */}
+      {gameState === 'spinWheel' && (
+        <SpinWheelScreen
           storeData={storeData}
           onDataChange={setStoreData}
           onBack={() => {

@@ -16,6 +16,7 @@ interface MysteryBoxScreenProps {
   storeData: GameStoreData;
   onBack: () => void;
   onDataChange: (data: GameStoreData) => void;
+  onSpinWheel?: () => void;
 }
 
 type Phase = 'input' | 'opening' | 'revealed';
@@ -24,6 +25,7 @@ export const MysteryBoxScreen: React.FC<MysteryBoxScreenProps> = ({
   storeData,
   onBack,
   onDataChange,
+  onSpinWheel,
 }) => {
   const [phase, setPhase] = useState<Phase>('input');
   const [code, setCode] = useState('');
@@ -52,6 +54,13 @@ export const MysteryBoxScreen: React.FC<MysteryBoxScreenProps> = ({
     // result contains { data, reward } — data already has ticket decremented and reward added
     saveGameData(result.data);
     onDataChange(result.data);
+
+    // If spin_ticket reward, redirect to spin wheel
+    if (result.reward.type === 'spin_ticket' && onSpinWheel) {
+      onSpinWheel();
+      return;
+    }
+
     setReward(result.reward);
     setPhase('opening');
   };

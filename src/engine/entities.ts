@@ -267,6 +267,42 @@ export function createRandomPickup(playerX: number, playerY: number): Pickup {
   return createPickup(x, y);
 }
 
+/** Create a dimsum pickup at a specific position (does not expire). */
+export function createDimsumPickup(x: number, y: number): Pickup {
+  return {
+    x,
+    y,
+    radius: 20,
+    type: 'dimsum',
+    life: 999999, // Dimsum never expires — must be collected
+    floatOffset: Math.random() * Math.PI * 2,
+  };
+}
+
+/** Spawn dimsum pickups across the map for a level. */
+export function spawnLevelDimsum(mapWidth: number, mapHeight: number, count: number, playerX: number, playerY: number): Pickup[] {
+  const dimsum: Pickup[] = [];
+  const margin = 100;
+  const minDistFromPlayer = 200;
+  const minDistBetween = 150;
+
+  for (let i = 0; i < count; i++) {
+    let attempts = 0;
+    let x: number, y: number;
+    do {
+      x = margin + Math.random() * (mapWidth - margin * 2);
+      y = margin + Math.random() * (mapHeight - margin * 2);
+      attempts++;
+    } while (
+      attempts < 50 &&
+      (Math.hypot(x - playerX, y - playerY) < minDistFromPlayer ||
+       dimsum.some(d => Math.hypot(d.x - x, d.y - y) < minDistBetween))
+    );
+    dimsum.push(createDimsumPickup(x, y));
+  }
+  return dimsum;
+}
+
 /** Create a map obstacle near the player. */
 export function createObstacle(playerX: number, playerY: number): Obstacle {
   const angle = Math.random() * Math.PI * 2;

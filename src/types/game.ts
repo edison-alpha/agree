@@ -17,7 +17,8 @@ export type GameState =
   | 'inventory'
   | 'mysteryBox'
   | 'settings'
-  | 'levelComplete';
+  | 'levelComplete'
+  | 'spinWheel';
 
 // ─── Dialogue ───────────────────────────────────────────────────────────────
 export type DialogueSpeaker = 'Goblin Bay' | 'Player';
