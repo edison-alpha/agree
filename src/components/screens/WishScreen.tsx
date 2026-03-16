@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import bubbleImg from '../../assets/underwater/Neutral/Bubble_2.png';
+import bubbleImg from '../../assets/underwater/Neutral/Bubble_2.webp';
 
 interface WishScreenProps {
   milestone: number;

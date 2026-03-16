@@ -4,15 +4,15 @@ import { HealthBar } from '../ui/HealthBar';
 import type { ActivePowerUp } from '../../types/game';
 
 // Sprite asset imports for HUD icons
-import spellIconFire from '../../assets/water-fire-sprite-magic/Icons/PNG/Icons_Fire Spell.png';
-import spellIconWater from '../../assets/water-fire-sprite-magic/Icons/PNG/Icons_Water Spell.png';
-import spellIconFireArrow from '../../assets/water-fire-sprite-magic/Icons/PNG/Icons_Fire Arrow.png';
-import energyIcon from '../../assets/energy-pack/energy/10.png';
-import bubbleIcon from '../../assets/underwater/Neutral/Bubble_2.png';
-import shieldPickup from '../../assets/underwater/Bonus/Shield.png';
-import accelerationPickup from '../../assets/underwater/Bonus/Acceleration.png';
-import heartPickup from '../../assets/underwater/Bonus/Heart.png';
-import chestClosed from '../../assets/underwater/Neutral/\u00e6hest_closed.png';
+import spellIconFire from '../../assets/water-fire-sprite-magic/Icons/PNG/Icons_Fire Spell.webp';
+import spellIconWater from '../../assets/water-fire-sprite-magic/Icons/PNG/Icons_Water Spell.webp';
+import spellIconFireArrow from '../../assets/water-fire-sprite-magic/Icons/PNG/Icons_Fire Arrow.webp';
+import energyIcon from '../../assets/energy-pack/energy/10.webp';
+import bubbleIcon from '../../assets/underwater/Neutral/Bubble_2.webp';
+import shieldPickup from '../../assets/underwater/Bonus/Shield.webp';
+import accelerationPickup from '../../assets/underwater/Bonus/Acceleration.webp';
+import heartPickup from '../../assets/underwater/Bonus/Heart.webp';
+import chestClosed from '../../assets/underwater/Neutral/\u00e6hest_closed.webp';
 
 interface GameHUDProps {
   score: number;

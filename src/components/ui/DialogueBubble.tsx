@@ -1,6 +1,6 @@
 import React from 'react';
 import type { DialogueMessage } from '../../types/game';
-import goblinBayPng from '../../assets/goblinbay.png';
+import goblinBayPng from '../../assets/goblinbay.webp';
 
 interface DialogueBubbleProps {
   message: DialogueMessage;

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
-import chestOpen from '../../assets/underwater/Neutral/\u00e6hest_open.png';
-import bubbleImg from '../../assets/underwater/Neutral/Bubble_2.png';
-import energyImg from '../../assets/energy-pack/energy/10.png';
+import chestOpen from '../../assets/underwater/Neutral/\u00e6hest_open.webp';
+import bubbleImg from '../../assets/underwater/Neutral/Bubble_2.webp';
+import energyImg from '../../assets/energy-pack/energy/10.webp';
 
 interface GameOverScreenProps {
   score: number;

@@ -1,6 +1,6 @@
 import type { CharacterOption } from '../types/game';
-import agreePng from '../assets/agree.png';
-import agreedasterPng from '../assets/agreedaster.png';
+import agreePng from '../assets/agree.webp';
+import agreedasterPng from '../assets/agreedaster.webp';
 
 export const CHARACTER_OPTIONS: CharacterOption[] = [
   {

@@ -1,5 +1,5 @@
 import React from 'react';
-import introPng from '../../assets/intro.png';
+import introPng from '../../assets/intro.webp';
 import { ProgressBar } from '../ui/ProgressBar';
 
 interface IntroScreenProps {

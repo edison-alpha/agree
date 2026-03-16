@@ -4,141 +4,141 @@ import { ALL_ASSETS } from '../constants/assets';
 import { playIntroAudio } from '../utils/audio';
 
 // ── Local image imports ────────────────────────────────────────────────
-import goblinBayPng from '../assets/goblinbay.png';
-import charAgreePng from '../assets/agree.png';
-import charAgreedasterPng from '../assets/agreedaster.png';
-import charAgreeFront from '../assets/caractertentara.png';
-import charAgreedasterFront from '../assets/caracterdaster.png';
+import goblinBayPng from '../assets/goblinbay.webp';
+import charAgreePng from '../assets/agree.webp';
+import charAgreedasterPng from '../assets/agreedaster.webp';
+import charAgreeFront from '../assets/caractertentara.webp';
+import charAgreedasterFront from '../assets/caracterdaster.webp';
 
 // ── Boss character sprites ─────────────────────────────────────────────
 // Viking Leader
-import bossVikingIdle from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Idle/Right - Idle_000.png';
-import bossVikingIdle1 from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Idle/Right - Idle_003.png';
-import bossVikingIdle2 from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Idle/Right - Idle_006.png';
-import bossVikingAttack from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Attacking/Right - Attacking_000.png';
-import bossVikingAttack1 from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Attacking/Right - Attacking_003.png';
-import bossVikingAttack2 from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Attacking/Right - Attacking_006.png';
-import bossVikingHurt from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Hurt/Right - Hurt_003.png';
-import bossVikingWalk from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Walking/Right - Walking_000.png';
-import bossVikingWalk1 from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Walking/Right - Walking_005.png';
-import bossVikingRun from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Running/Right - Running_000.png';
+import bossVikingIdle from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Idle/Right - Idle_000.webp';
+import bossVikingIdle1 from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Idle/Right - Idle_003.webp';
+import bossVikingIdle2 from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Idle/Right - Idle_006.webp';
+import bossVikingAttack from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Attacking/Right - Attacking_000.webp';
+import bossVikingAttack1 from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Attacking/Right - Attacking_003.webp';
+import bossVikingAttack2 from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Attacking/Right - Attacking_006.webp';
+import bossVikingHurt from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Hurt/Right - Hurt_003.webp';
+import bossVikingWalk from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Walking/Right - Walking_000.webp';
+import bossVikingWalk1 from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Walking/Right - Walking_005.webp';
+import bossVikingRun from '../assets/boss-caracter/Viking Leader/PNG/PNG Sequences/Right - Running/Right - Running_000.webp';
 
 // Giant Goblin
-import bossGoblinIdle from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Front - Idle/Front - Idle_000.png';
-import bossGoblinIdle1 from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Right - Idle/Right - Idle_000.png';
-import bossGoblinIdle2 from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Right - Idle/Right - Idle_005.png';
-import bossGoblinAttack from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Right - Attacking/Right - Attacking_000.png';
-import bossGoblinAttack1 from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Right - Attacking/Right - Attacking_003.png';
-import bossGoblinAttack2 from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Right - Attacking/Right - Attacking_006.png';
-import bossGoblinHurt from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Right - Hurt/Right - Hurt_003.png';
-import bossGoblinWalk from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Right - Walking/Right - Walking_000.png';
-import bossGoblinRun from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Right - Running/Right - Running_000.png';
+import bossGoblinIdle from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Front - Idle/Front - Idle_000.webp';
+import bossGoblinIdle1 from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Right - Idle/Right - Idle_000.webp';
+import bossGoblinIdle2 from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Right - Idle/Right - Idle_005.webp';
+import bossGoblinAttack from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Right - Attacking/Right - Attacking_000.webp';
+import bossGoblinAttack1 from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Right - Attacking/Right - Attacking_003.webp';
+import bossGoblinAttack2 from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Right - Attacking/Right - Attacking_006.webp';
+import bossGoblinHurt from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Right - Hurt/Right - Hurt_003.webp';
+import bossGoblinWalk from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Right - Walking/Right - Walking_000.webp';
+import bossGoblinRun from '../assets/boss-caracter/Giant Goblin/PNG/PNG Sequences/Right - Running/Right - Running_000.webp';
 
 // Caveman Boss
-import bossCavemanIdle from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Idle/Right - Idle_000.png';
-import bossCavemanIdle1 from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Idle/Right - Idle_005.png';
-import bossCavemanIdle2 from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Idle/Right - Idle_010.png';
-import bossCavemanAttack from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Attacking/Right - Attacking_000.png';
-import bossCavemanAttack1 from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Attacking/Right - Attacking_003.png';
-import bossCavemanAttack2 from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Attacking/Right - Attacking_006.png';
-import bossCavemanHurt from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Hurt/Right - Hurt_003.png';
-import bossCavemanWalk from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Walking/Right - Walking_000.png';
-import bossCavemanRun from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Running/Right - Running_000.png';
+import bossCavemanIdle from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Idle/Right - Idle_000.webp';
+import bossCavemanIdle1 from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Idle/Right - Idle_005.webp';
+import bossCavemanIdle2 from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Idle/Right - Idle_010.webp';
+import bossCavemanAttack from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Attacking/Right - Attacking_000.webp';
+import bossCavemanAttack1 from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Attacking/Right - Attacking_003.webp';
+import bossCavemanAttack2 from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Attacking/Right - Attacking_006.webp';
+import bossCavemanHurt from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Hurt/Right - Hurt_003.webp';
+import bossCavemanWalk from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Walking/Right - Walking_000.webp';
+import bossCavemanRun from '../assets/boss-caracter/Caveman Boss/PNG/PNG Sequences/Right - Running/Right - Running_000.webp';
 
 // ── Underwater pickup sprites ──────────────────────────────────────────
-import pickupHeart from '../assets/underwater/Bonus/Heart.png';
-import pickupShield from '../assets/underwater/Bonus/Shield.png';
-import pickupCoin from '../assets/underwater/Bonus/Coin.png';
-import pickupCrown from '../assets/underwater/Bonus/Crown.png';
-import pickupPearl from '../assets/underwater/Bonus/Pearl.png';
-import pickupAcceleration from '../assets/underwater/Bonus/Acceleration.png';
-import pickupSmallBomb from '../assets/underwater/Bonus/Small-bomb.png';
-import pickupMagnet from '../assets/underwater/Bonus/Magnet.png';
+import pickupHeart from '../assets/underwater/Bonus/Heart.webp';
+import pickupShield from '../assets/underwater/Bonus/Shield.webp';
+import pickupCoin from '../assets/underwater/Bonus/Coin.webp';
+import pickupCrown from '../assets/underwater/Bonus/Crown.webp';
+import pickupPearl from '../assets/underwater/Bonus/Pearl.webp';
+import pickupAcceleration from '../assets/underwater/Bonus/Acceleration.webp';
+import pickupSmallBomb from '../assets/underwater/Bonus/Small-bomb.webp';
+import pickupMagnet from '../assets/underwater/Bonus/Magnet.webp';
 
 // ── Mystery Box (Chest) ───────────────────────────────────────────────
-import chestClosed from '../assets/underwater/Neutral/\u00e6hest_closed.png';
-import chestAjar from '../assets/underwater/Neutral/\u00e6hest_ajar.png';
-import chestOpen from '../assets/underwater/Neutral/\u00e6hest_open.png';
+import chestClosed from '../assets/underwater/Neutral/\u00e6hest_closed.webp';
+import chestAjar from '../assets/underwater/Neutral/\u00e6hest_ajar.webp';
+import chestOpen from '../assets/underwater/Neutral/\u00e6hest_open.webp';
 
 // ── Bubble sprites (score animation) ──────────────────────────────────
-import bubble1 from '../assets/underwater/Neutral/Bubble_1.png';
-import bubble2 from '../assets/underwater/Neutral/Bubble_2.png';
-import bubble3 from '../assets/underwater/Neutral/Bubble_3.png';
+import bubble1 from '../assets/underwater/Neutral/Bubble_1.webp';
+import bubble2 from '../assets/underwater/Neutral/Bubble_2.webp';
+import bubble3 from '../assets/underwater/Neutral/Bubble_3.webp';
 
 // ── Underwater obstacles (map hazards & decoration) ───────────────────
-import obstacleStone1 from '../assets/underwater/Let/Stone_1.png';
-import obstacleStone2 from '../assets/underwater/Let/Stone_2.png';
-import obstacleStone3 from '../assets/underwater/Let/Stone_3.png';
-import obstacleStone4 from '../assets/underwater/Let/Stone_4.png';
-import obstacleStone5 from '../assets/underwater/Let/Stone_5.png';
-import obstacleStone6 from '../assets/underwater/Let/Stone_6.png';
-import obstacleBarrel1 from '../assets/underwater/Let/Barrel_1.png';
-import obstacleBarrel2 from '../assets/underwater/Let/Barrel_2.png';
-import obstacleBomb from '../assets/underwater/Let/Bomb.png';
-import obstacleAnchor from '../assets/underwater/Let/Anchor.png';
-import obstacleChain from '../assets/underwater/Let/Chain.png';
-import obstacleMast from '../assets/underwater/Let/Mast.png';
-import obstacleNet from '../assets/underwater/Let/Net.png';
-import obstacleSeaweed1 from '../assets/underwater/Let/Seaweed_1.png';
-import obstacleSeaweed2 from '../assets/underwater/Let/Seaweed_2.png';
-import obstacleSteeringWheel from '../assets/underwater/Let/Steering-wheel.png';
+import obstacleStone1 from '../assets/underwater/Let/Stone_1.webp';
+import obstacleStone2 from '../assets/underwater/Let/Stone_2.webp';
+import obstacleStone3 from '../assets/underwater/Let/Stone_3.webp';
+import obstacleStone4 from '../assets/underwater/Let/Stone_4.webp';
+import obstacleStone5 from '../assets/underwater/Let/Stone_5.webp';
+import obstacleStone6 from '../assets/underwater/Let/Stone_6.webp';
+import obstacleBarrel1 from '../assets/underwater/Let/Barrel_1.webp';
+import obstacleBarrel2 from '../assets/underwater/Let/Barrel_2.webp';
+import obstacleBomb from '../assets/underwater/Let/Bomb.webp';
+import obstacleAnchor from '../assets/underwater/Let/Anchor.webp';
+import obstacleChain from '../assets/underwater/Let/Chain.webp';
+import obstacleMast from '../assets/underwater/Let/Mast.webp';
+import obstacleNet from '../assets/underwater/Let/Net.webp';
+import obstacleSeaweed1 from '../assets/underwater/Let/Seaweed_1.webp';
+import obstacleSeaweed2 from '../assets/underwater/Let/Seaweed_2.webp';
+import obstacleSteeringWheel from '../assets/underwater/Let/Steering-wheel.webp';
 
 // ── Fire/Water spell projectile frames ────────────────────────────────
-import fireBall1 from '../assets/water-fire-sprite-magic/Fire Ball/PNG/Fire Ball_Frame_01.png';
-import fireBall2 from '../assets/water-fire-sprite-magic/Fire Ball/PNG/Fire Ball_Frame_02.png';
-import fireBall3 from '../assets/water-fire-sprite-magic/Fire Ball/PNG/Fire Ball_Frame_03.png';
-import fireBall4 from '../assets/water-fire-sprite-magic/Fire Ball/PNG/Fire Ball_Frame_04.png';
-import fireBall5 from '../assets/water-fire-sprite-magic/Fire Ball/PNG/Fire Ball_Frame_05.png';
-import fireBall6 from '../assets/water-fire-sprite-magic/Fire Ball/PNG/Fire Ball_Frame_06.png';
-import fireBall7 from '../assets/water-fire-sprite-magic/Fire Ball/PNG/Fire Ball_Frame_07.png';
-import fireBall8 from '../assets/water-fire-sprite-magic/Fire Ball/PNG/Fire Ball_Frame_08.png';
+import fireBall1 from '../assets/water-fire-sprite-magic/Fire Ball/PNG/Fire Ball_Frame_01.webp';
+import fireBall2 from '../assets/water-fire-sprite-magic/Fire Ball/PNG/Fire Ball_Frame_02.webp';
+import fireBall3 from '../assets/water-fire-sprite-magic/Fire Ball/PNG/Fire Ball_Frame_03.webp';
+import fireBall4 from '../assets/water-fire-sprite-magic/Fire Ball/PNG/Fire Ball_Frame_04.webp';
+import fireBall5 from '../assets/water-fire-sprite-magic/Fire Ball/PNG/Fire Ball_Frame_05.webp';
+import fireBall6 from '../assets/water-fire-sprite-magic/Fire Ball/PNG/Fire Ball_Frame_06.webp';
+import fireBall7 from '../assets/water-fire-sprite-magic/Fire Ball/PNG/Fire Ball_Frame_07.webp';
+import fireBall8 from '../assets/water-fire-sprite-magic/Fire Ball/PNG/Fire Ball_Frame_08.webp';
 
-import waterBall1 from '../assets/water-fire-sprite-magic/Water Ball/PNG/Water Ball_Frame_01.png';
-import waterBall2 from '../assets/water-fire-sprite-magic/Water Ball/PNG/Water Ball_Frame_02.png';
-import waterBall3 from '../assets/water-fire-sprite-magic/Water Ball/PNG/Water Ball_Frame_03.png';
-import waterBall4 from '../assets/water-fire-sprite-magic/Water Ball/PNG/Water Ball_Frame_04.png';
-import waterBall5 from '../assets/water-fire-sprite-magic/Water Ball/PNG/Water Ball_Frame_05.png';
-import waterBall6 from '../assets/water-fire-sprite-magic/Water Ball/PNG/Water Ball_Frame_06.png';
+import waterBall1 from '../assets/water-fire-sprite-magic/Water Ball/PNG/Water Ball_Frame_01.webp';
+import waterBall2 from '../assets/water-fire-sprite-magic/Water Ball/PNG/Water Ball_Frame_02.webp';
+import waterBall3 from '../assets/water-fire-sprite-magic/Water Ball/PNG/Water Ball_Frame_03.webp';
+import waterBall4 from '../assets/water-fire-sprite-magic/Water Ball/PNG/Water Ball_Frame_04.webp';
+import waterBall5 from '../assets/water-fire-sprite-magic/Water Ball/PNG/Water Ball_Frame_05.webp';
+import waterBall6 from '../assets/water-fire-sprite-magic/Water Ball/PNG/Water Ball_Frame_06.webp';
 
-import fireArrow1 from '../assets/water-fire-sprite-magic/Fire Arrow/PNG/Fire Arrow_Frame_01.png';
-import fireArrow2 from '../assets/water-fire-sprite-magic/Fire Arrow/PNG/Fire Arrow_Frame_02.png';
-import fireArrow3 from '../assets/water-fire-sprite-magic/Fire Arrow/PNG/Fire Arrow_Frame_03.png';
-import fireArrow4 from '../assets/water-fire-sprite-magic/Fire Arrow/PNG/Fire Arrow_Frame_04.png';
+import fireArrow1 from '../assets/water-fire-sprite-magic/Fire Arrow/PNG/Fire Arrow_Frame_01.webp';
+import fireArrow2 from '../assets/water-fire-sprite-magic/Fire Arrow/PNG/Fire Arrow_Frame_02.webp';
+import fireArrow3 from '../assets/water-fire-sprite-magic/Fire Arrow/PNG/Fire Arrow_Frame_03.webp';
+import fireArrow4 from '../assets/water-fire-sprite-magic/Fire Arrow/PNG/Fire Arrow_Frame_04.webp';
 
-import waterArrow1 from '../assets/water-fire-sprite-magic/Water Arrow/PNG/Water Arrow_Frame_01.png';
-import waterArrow2 from '../assets/water-fire-sprite-magic/Water Arrow/PNG/Water Arrow_Frame_02.png';
-import waterArrow3 from '../assets/water-fire-sprite-magic/Water Arrow/PNG/Water Arrow_Frame_03.png';
-import waterArrow4 from '../assets/water-fire-sprite-magic/Water Arrow/PNG/Water Arrow_Frame_04.png';
+import waterArrow1 from '../assets/water-fire-sprite-magic/Water Arrow/PNG/Water Arrow_Frame_01.webp';
+import waterArrow2 from '../assets/water-fire-sprite-magic/Water Arrow/PNG/Water Arrow_Frame_02.webp';
+import waterArrow3 from '../assets/water-fire-sprite-magic/Water Arrow/PNG/Water Arrow_Frame_03.webp';
+import waterArrow4 from '../assets/water-fire-sprite-magic/Water Arrow/PNG/Water Arrow_Frame_04.webp';
 
-import waterSpell1 from '../assets/water-fire-sprite-magic/Water Spell/PNG/Water Spell_Frame_01.png';
-import waterSpell4 from '../assets/water-fire-sprite-magic/Water Spell/PNG/Water Spell_Frame_04.png';
+import waterSpell1 from '../assets/water-fire-sprite-magic/Water Spell/PNG/Water Spell_Frame_01.webp';
+import waterSpell4 from '../assets/water-fire-sprite-magic/Water Spell/PNG/Water Spell_Frame_04.webp';
 
-import fireSpell1 from '../assets/water-fire-sprite-magic/Fire Spell/PNG/Fire Spell_Frame_01.png';
-import fireSpell4 from '../assets/water-fire-sprite-magic/Fire Spell/PNG/Fire Spell_Frame_04.png';
+import fireSpell1 from '../assets/water-fire-sprite-magic/Fire Spell/PNG/Fire Spell_Frame_01.webp';
+import fireSpell4 from '../assets/water-fire-sprite-magic/Fire Spell/PNG/Fire Spell_Frame_04.webp';
 
 // ── Spell icons ──────────────────────────────────────────────────────
-import iconFireBall from '../assets/water-fire-sprite-magic/Icons/PNG/Icons_Fire Ball.png';
-import iconWaterBall from '../assets/water-fire-sprite-magic/Icons/PNG/Icons_Water Ball.png';
-import iconFireArrow from '../assets/water-fire-sprite-magic/Icons/PNG/Icons_Fire Arrow.png';
-import iconWaterArrow from '../assets/water-fire-sprite-magic/Icons/PNG/Icons_Water Arrow.png';
-import iconFireSpell from '../assets/water-fire-sprite-magic/Icons/PNG/Icons_Fire Spell.png';
-import iconWaterSpell from '../assets/water-fire-sprite-magic/Icons/PNG/Icons_Water Spell.png';
+import iconFireBall from '../assets/water-fire-sprite-magic/Icons/PNG/Icons_Fire Ball.webp';
+import iconWaterBall from '../assets/water-fire-sprite-magic/Icons/PNG/Icons_Water Ball.webp';
+import iconFireArrow from '../assets/water-fire-sprite-magic/Icons/PNG/Icons_Fire Arrow.webp';
+import iconWaterArrow from '../assets/water-fire-sprite-magic/Icons/PNG/Icons_Water Arrow.webp';
+import iconFireSpell from '../assets/water-fire-sprite-magic/Icons/PNG/Icons_Fire Spell.webp';
+import iconWaterSpell from '../assets/water-fire-sprite-magic/Icons/PNG/Icons_Water Spell.webp';
 
 // ── Energy effects ────────────────────────────────────────────────────
-import energy1 from '../assets/energy-pack/energy/1.png';
-import energy2 from '../assets/energy-pack/energy/2.png';
-import energy3 from '../assets/energy-pack/energy/3.png';
-import energy5 from '../assets/energy-pack/energy/5.png';
-import energy7 from '../assets/energy-pack/energy/7.png';
-import energy10 from '../assets/energy-pack/energy/10.png';
-import energy15 from '../assets/energy-pack/energy/15.png';
-import energy20 from '../assets/energy-pack/energy/20.png';
-import energy25 from '../assets/energy-pack/energy/25.png';
-import energy30 from '../assets/energy-pack/energy/30.png';
-import energy35 from '../assets/energy-pack/energy/35.png';
-import energy40 from '../assets/energy-pack/energy/40.png';
-import energy45 from '../assets/energy-pack/energy/45.png';
-import energy50 from '../assets/energy-pack/energy/50.png';
+import energy1 from '../assets/energy-pack/energy/1.webp';
+import energy2 from '../assets/energy-pack/energy/2.webp';
+import energy3 from '../assets/energy-pack/energy/3.webp';
+import energy5 from '../assets/energy-pack/energy/5.webp';
+import energy7 from '../assets/energy-pack/energy/7.webp';
+import energy10 from '../assets/energy-pack/energy/10.webp';
+import energy15 from '../assets/energy-pack/energy/15.webp';
+import energy20 from '../assets/energy-pack/energy/20.webp';
+import energy25 from '../assets/energy-pack/energy/25.webp';
+import energy30 from '../assets/energy-pack/energy/30.webp';
+import energy35 from '../assets/energy-pack/energy/35.webp';
+import energy40 from '../assets/energy-pack/energy/40.webp';
+import energy45 from '../assets/energy-pack/energy/45.webp';
+import energy50 from '../assets/energy-pack/energy/50.webp';
 
 // ── Local asset registry ──────────────────────────────────────────────
 const LOCAL_IMAGE_ASSETS: Record<string, string> = {
