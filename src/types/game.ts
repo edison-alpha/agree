@@ -7,6 +7,7 @@ export type GameState =
   | 'dialogue'
   | 'tutorial'
   | 'milestoneDialogue'
+  | 'battleLoading'
   | 'playing'
   | 'wish'
   | 'gameover'

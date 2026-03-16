@@ -19,6 +19,7 @@ import {
   saveProfile,
   saveLevelProgress,
   addToLeaderboard,
+  addBirthdayReward,
   getTotalStars,
   getCompletedLevels,
   getTicketProgress,
@@ -51,6 +52,7 @@ import { LevelCompleteScreen } from './components/screens/LevelCompleteScreen';
 import { SettingsScreen } from './components/screens/SettingsScreen';
 import { SpinWheelScreen } from './components/screens/SpinWheelScreen';
 import { GamePauseMenu } from './components/screens/GamePauseMenu';
+import { BattleLoadingScreen } from './components/screens/BattleLoadingScreen';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 import { playSoundEffect } from './utils/audio';
@@ -224,7 +226,7 @@ export default function App() {
   );
 
   const onBirthday = useCallback(() => {
-    // Legacy: redirect to level complete
+    // Save level progress first
     const timeElapsed = (performance.now() - levelStartTime) / 1000;
     setLevelTimeElapsed(timeElapsed);
     setDimsumCollected(gameRef.current.dimsumCollected);
@@ -239,7 +241,7 @@ export default function App() {
       timeElapsed,
     );
 
-    const finalData = addToLeaderboard(updated, {
+    const withLeaderboard = addToLeaderboard(updated, {
       playerName: playerName.trim(),
       profilePhoto: camera.profilePhoto,
       totalDimsum: updated.totalDimsum,
@@ -247,11 +249,14 @@ export default function App() {
       totalStars: getTotalStars(updated),
     });
 
+    // Save birthday greeting as a reward in mysteryBoxRewards
+    const finalData = addBirthdayReward(withLeaderboard, playerName.trim(), wishes);
+
     setStoreData(finalData);
-    setGameState('levelComplete');
+    setGameState('birthday');
     audio.stopBackgroundMusic();
     playSoundEffect(gameRef.current.audio['victory_music']);
-  }, [audio, levelStartTime, storeData, currentLevelId, playerName, camera.profilePhoto]);
+  }, [audio, levelStartTime, storeData, currentLevelId, playerName, camera.profilePhoto, wishes]);
 
   const onDimsumCollected = useCallback(
     (collected: number, total: number) => {
@@ -368,10 +373,15 @@ export default function App() {
     setLevelStartTime(performance.now());
     gameRef.current.levelStartTime = performance.now();
 
+    // Go to battle loading screen first (countdown before gameplay)
+    setGameState('battleLoading');
+  };
+
+  const onBattleReady = useCallback(() => {
     setGameState('playing');
     gameRef.current.state = 'playing';
     audio.startBackgroundMusic();
-  };
+  }, [audio]);
 
   const beginGameplay = () => {
     const trimmed = playerName.trim();
@@ -678,6 +688,18 @@ export default function App() {
         />
       )}
 
+      {/* ── Battle Loading Screen ──────────────────────────────────── */}
+      {gameState === 'battleLoading' && (
+        <BattleLoadingScreen
+          levelName={currentLevel?.name || 'Unknown'}
+          levelNumber={currentLevelId}
+          dimsumCount={dimsumTotal}
+          characterImage={selectedCharacter.image}
+          characterName={selectedCharacter.name}
+          onReady={onBattleReady}
+        />
+      )}
+
       {/* ── Playing HUD ──────────────────────────────────────────────── */}
       {gameState === 'playing' && (
         <GameHUD
@@ -777,9 +799,21 @@ export default function App() {
         />
       )}
 
-      {/* ── Birthday / Victory (legacy, kept for compatibility) ───────── */}
+      {/* ── Birthday / Victory ─────────────────────────────────────────── */}
       {gameState === 'birthday' && (
-        <BirthdayScreen playerName={playerName} wishes={wishes} onRestart={restartGame} />
+        <BirthdayScreen
+          playerName={playerName}
+          wishes={wishes}
+          dimsumCollected={storeData.totalDimsum}
+          onPlayAgain={restartGame}
+          onViewRewards={() => {
+            setGameState('inventory');
+          }}
+          onMenu={() => {
+            setGameState('mainMenu');
+            gameRef.current.state = 'mainMenu';
+          }}
+        />
       )}
     </div>
   );

@@ -374,6 +374,58 @@ function generateMysteryReward(code: string): MysteryBoxReward {
   return rewards[Math.floor(Math.random() * rewards.length)];
 }
 
+// ─── Birthday Greeting Reward ────────────────────────────────────────────────
+
+export function addBirthdayReward(
+  data: GameStoreData,
+  playerName: string,
+  wishes: string[],
+): GameStoreData {
+  // Don't add duplicate birthday greetings
+  const alreadyHas = data.mysteryBoxRewards.some(
+    (r) => r.type === 'birthday_card' && r.id.startsWith('bday_greeting_'),
+  );
+  if (alreadyHas) return data;
+
+  const wishText = wishes.length > 0
+    ? wishes.map((w) => `✨ ${w}`).join('\n')
+    : '';
+
+  const message = [
+    `Selamat Ulang Tahun, ${playerName}! 🎉🎂`,
+    '',
+    'Terima kasih sudah bermain Dimsum Dash!',
+    'Semoga di hari spesialmu ini semua harapan dan impianmu terwujud.',
+    '',
+    wishText ? '── Wishes ──' : '',
+    wishText,
+    '',
+    'Kamu adalah orang yang luar biasa! ✨',
+    '',
+    'With love and warm wishes! 💝',
+  ]
+    .filter((line) => line !== undefined)
+    .join('\n');
+
+  const reward: MysteryBoxReward = {
+    id: `bday_greeting_${Date.now()}`,
+    type: 'birthday_card',
+    name: `🎂 Birthday Card for ${playerName}`,
+    description: 'A special birthday greeting saved from your adventure!',
+    icon: '🎂',
+    message,
+    claimed: true,
+    claimedAt: Date.now(),
+  };
+
+  const updated = {
+    ...data,
+    mysteryBoxRewards: [...data.mysteryBoxRewards, reward],
+  };
+  saveGameData(updated);
+  return updated;
+}
+
 // ─── Leaderboard ─────────────────────────────────────────────────────────────
 
 export function addToLeaderboard(data: GameStoreData, entry: Omit<LeaderboardEntry, 'timestamp'>): GameStoreData {
