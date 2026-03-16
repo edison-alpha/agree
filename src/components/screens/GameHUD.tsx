@@ -9,9 +9,9 @@ import spellIconWater from '../../assets/water-fire-sprite-magic/Icons/PNG/Icons
 import spellIconFireArrow from '../../assets/water-fire-sprite-magic/Icons/PNG/Icons_Fire Arrow.png';
 import energyIcon from '../../assets/energy-pack/energy/10.png';
 import bubbleIcon from '../../assets/underwater/Neutral/Bubble_2.png';
-import shieldPickup from '../../assets/underwater/Bonus/shield.png';
-import accelerationPickup from '../../assets/underwater/Bonus/acceleration.png';
-import heartPickup from '../../assets/underwater/Bonus/heart.png';
+import shieldPickup from '../../assets/underwater/Bonus/Shield.png';
+import accelerationPickup from '../../assets/underwater/Bonus/Acceleration.png';
+import heartPickup from '../../assets/underwater/Bonus/Heart.png';
 import chestClosed from '../../assets/underwater/Neutral/\u00e6hest_closed.png';
 
 interface GameHUDProps {
