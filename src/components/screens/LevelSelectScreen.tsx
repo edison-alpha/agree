@@ -4,13 +4,20 @@ import { isLevelUnlocked, getTotalStars } from '../../store/gameStore';
 import { LEVELS } from '../../constants/levels';
 import type { LevelConfig } from '../../constants/levels';
 import dimsumImg from '../../assets/dimsum.png';
-import bubbleImg from '../../assets/underwater/Neutral/Bubble_2.webp';
+import arenaBg from '../../assets/arena_background.webp';
 
 interface LevelSelectScreenProps {
   storeData: GameStoreData;
   onSelectLevel: (levelId: number) => void;
   onBack: () => void;
 }
+
+const DIFF_COLORS: Record<string, string> = {
+  easy: '#4ade80',
+  medium: '#fbbf24',
+  hard: '#f87171',
+  extreme: '#c084fc',
+};
 
 export const LevelSelectScreen: React.FC<LevelSelectScreenProps> = ({
   storeData,
@@ -20,154 +27,164 @@ export const LevelSelectScreen: React.FC<LevelSelectScreenProps> = ({
   const totalStars = getTotalStars(storeData);
 
   return (
-    <div
-      className="absolute inset-0 z-50 flex flex-col bg-[#111]/95 backdrop-blur-sm"
+    <div className="absolute inset-0 z-50 flex flex-col overflow-hidden"
       style={{
-        paddingBottom: 'max(12px, env(safe-area-inset-bottom, 12px))',
-        paddingTop: 'max(12px, env(safe-area-inset-top, 12px))',
+        backgroundImage: `url(${arenaBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        paddingTop: 'max(8px, env(safe-area-inset-top, 8px))',
+        paddingBottom: 'max(8px, env(safe-area-inset-bottom, 8px))',
       }}
     >
-      {/* Floating bg */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(4)].map((_, i) => (
-          <img key={i} src={bubbleImg} alt="" className="absolute opacity-[0.04]"
-            style={{
-              width: `${18 + i * 6}px`,
-              left: `${15 + i * 20}%`,
-              bottom: `-10px`,
-              animation: `float-up ${8 + i * 2}s ease-in-out infinite`,
-              animationDelay: `${i * 0.8}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="relative flex min-h-0 flex-1 flex-col px-4 sm:mx-auto sm:max-w-2xl sm:px-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-3 shrink-0 pt-1">
-          <button
-            onClick={onBack}
-            className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/5 border border-white/10 transition active:scale-90"
-          >
-            <span className="text-base">←</span>
-          </button>
-          <div className="text-center">
-            <div className="text-[10px] font-black uppercase tracking-[0.35em] text-yellow-400">Select Level</div>
-          </div>
-          <div className="flex items-center gap-1 rounded-lg px-2 py-1 bg-white/5 border border-white/10">
-            <span className="text-xs">⭐</span>
-            <span className="text-xs font-bold text-yellow-400">{totalStars}</span>
-          </div>
+      <div className="absolute inset-0 bg-black/50 pointer-events-none" />
+      {/* Header */}
+      <div className="relative z-10 flex items-center gap-3 px-4 py-2 mx-2 mb-2 rounded-2xl"
+        style={{
+          background: 'rgba(0,0,0,0.5)',
+          border: '1px solid rgba(255,215,0,0.15)',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.4)',
+        }}
+      >
+        <button onClick={onBack} className="w-8 h-8 rounded-xl flex items-center justify-center transition active:scale-90"
+          style={{ background: 'rgba(255,215,0,0.08)', border: '1px solid rgba(255,215,0,0.15)' }}
+        >
+          <span className="text-sm">←</span>
+        </button>
+        <div className="flex-1 text-center">
+          <span className="text-xs font-black uppercase tracking-[0.25em] text-amber-400">⚔️ Select Level</span>
         </div>
-
-        {/* Level List */}
-        <div className="flex-1 min-h-0 overflow-y-auto space-y-2.5 pb-3">
-          {LEVELS.map((level) => {
-            const unlocked = isLevelUnlocked(storeData, level.id);
-            const progress = storeData.levels[level.id];
-            const starRequirementMet = totalStars >= level.unlockRequirement;
-            const canPlay = unlocked && starRequirementMet;
-
-            return (
-              <LevelCard
-                key={level.id}
-                level={level}
-                progress={progress}
-                unlocked={canPlay}
-                starRequirement={level.unlockRequirement}
-                currentStars={totalStars}
-                onSelect={() => canPlay && onSelectLevel(level.id)}
-              />
-            );
-          })}
+        <div className="flex items-center gap-1 px-2 py-0.5 rounded-lg"
+          style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,215,0,0.1)' }}
+        >
+          <span className="text-xs">⭐</span>
+          <span className="text-xs font-black text-amber-400">{totalStars}</span>
         </div>
       </div>
 
-      <style>{`
-        @keyframes float-up {
-          0%, 100% { transform: translateY(0) scale(1); opacity: 0.04; }
-          50% { transform: translateY(-${window.innerHeight}px) scale(0.5); opacity: 0; }
-        }
-      `}</style>
+      {/* Level List */}
+      <div className="relative z-10 flex-1 min-h-0 overflow-y-auto px-4 pb-4 space-y-2.5">
+        {LEVELS.map((level) => {
+          const unlocked = isLevelUnlocked(storeData, level.id);
+          const progress = storeData.levels[level.id];
+          return (
+            <LevelCard
+              key={level.id}
+              level={level}
+              unlocked={unlocked}
+              progress={progress}
+              totalStars={totalStars}
+              onSelect={() => unlocked && onSelectLevel(level.id)}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 };
 
-interface LevelCardProps {
+/* ─── Level Card ─────────────────────────────────────────────────────────── */
+
+const LevelCard: React.FC<{
   level: LevelConfig;
-  progress?: { dimsumCollected: number; dimsumTotal: number; stars: number; completed: boolean; bestTime: number };
   unlocked: boolean;
-  starRequirement: number;
-  currentStars: number;
+  progress: { dimsumCollected: number; dimsumTotal: number; stars: number; completed: boolean; bestTime: number } | undefined;
+  totalStars: number;
   onSelect: () => void;
-}
+}> = ({ level, unlocked, progress, totalStars, onSelect }) => {
+  const diffColor = DIFF_COLORS[level.difficulty] || '#fbbf24';
 
-const LevelCard: React.FC<LevelCardProps> = ({ level, progress, unlocked, starRequirement, currentStars, onSelect }) => (
-  <button
-    onClick={onSelect}
-    disabled={!unlocked}
-    className={`w-full rounded-[22px] border p-3 text-left transition active:scale-[0.98] shadow-lg
-      ${unlocked
-        ? 'border-white/10 bg-[#171717]/95'
-        : 'border-white/5 bg-[#171717]/50 opacity-50'
-      }`}
-  >
-    <div className="flex items-start gap-3">
-      {/* Level Icon */}
-      <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 ${unlocked ? 'bg-yellow-500/10 border border-yellow-400/20' : 'bg-white/5 border border-white/10'}`}>
-        {unlocked ? level.icon : '🔒'}
-      </div>
-
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-0.5">
-          <span className="text-sm font-black text-white">Level {level.id}</span>
-          <span className={`text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full ${
-            level.difficulty === 'easy' ? 'bg-green-500/15 text-green-400' :
-            level.difficulty === 'medium' ? 'bg-yellow-500/15 text-yellow-400' :
-            level.difficulty === 'hard' ? 'bg-red-500/15 text-red-400' :
-            'bg-purple-500/15 text-purple-400'
-          }`}>
-            {level.difficulty}
-          </span>
-        </div>
-        <div className="text-xs font-bold text-zinc-300 mb-0.5">{level.name}</div>
-        <div className="text-[10px] text-zinc-500 mb-2 leading-tight">{level.description}</div>
-
-        {/* Stats */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-0.5">
-            {[1, 2, 3].map((star) => (
-              <span key={star} className="text-xs"
-                style={{ filter: progress && progress.stars >= star ? 'drop-shadow(0 0 3px rgba(250,204,21,0.5))' : 'grayscale(1) opacity(0.25)' }}
-              >⭐</span>
-            ))}
-          </div>
-          <div className="flex items-center gap-1">
-            <img src={dimsumImg} alt="" className="h-3.5 w-3.5" />
-            <span className="text-[10px] font-bold text-zinc-400">
-              {progress ? `${progress.dimsumCollected}/${level.dimsumCount}` : `0/${level.dimsumCount}`}
-            </span>
-          </div>
-          {progress?.bestTime ? (
-            <div className="flex items-center gap-1">
-              <span className="text-[10px]">⏱️</span>
-              <span className="text-[10px] font-bold text-zinc-400">{formatTime(progress.bestTime)}</span>
+  return (
+    <button
+      onClick={onSelect}
+      disabled={!unlocked}
+      className="w-full text-left rounded-2xl p-3 transition active:scale-[0.98] relative overflow-hidden group"
+      style={{
+        background: unlocked ? 'rgba(0,0,0,0.45)' : 'rgba(0,0,0,0.25)',
+        border: unlocked
+          ? '1px solid rgba(255,215,0,0.2)'
+          : '1px solid rgba(100,80,140,0.2)',
+        boxShadow: unlocked ? '0 4px 16px rgba(0,0,0,0.3)' : 'none',
+        opacity: unlocked ? 1 : 0.6,
+      }}
+    >
+      <div className="flex items-center gap-3">
+        {/* Level Icon */}
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 relative"
+          style={{
+            background: unlocked
+              ? `rgba(0,0,0,0.3)`
+              : 'rgba(255,255,255,0.03)',
+            border: `1px solid ${unlocked ? `${diffColor}30` : 'rgba(100,80,140,0.15)'}`,
+          }}
+        >
+          {unlocked ? level.icon : '🔒'}
+          {progress?.completed && (
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center"
+              style={{ background: 'linear-gradient(180deg, #4ade80, #22c55e)', boxShadow: '0 0 6px rgba(74,222,128,0.4)' }}
+            >
+              <span className="text-[8px] text-white font-black">✓</span>
             </div>
-          ) : null}
+          )}
         </div>
 
-        {!unlocked && starRequirement > 0 && (
-          <div className="mt-1.5 text-[10px] text-zinc-500">
-            🔒 Requires {starRequirement} ⭐ (you have {currentStars})
+        {/* Level Info */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-sm font-black text-white truncate">{level.name}</span>
+            <span className="text-[8px] font-black uppercase px-1.5 py-0.5 rounded-full"
+              style={{
+                background: `${diffColor}15`,
+                color: diffColor,
+                border: `1px solid ${diffColor}30`,
+              }}
+            >{level.difficulty}</span>
+          </div>
+
+          {unlocked ? (
+            <>
+              <p className="text-[10px] text-purple-300/70 truncate mb-1">{level.description}</p>
+              <div className="flex items-center gap-3">
+                {/* Stars */}
+                <div className="flex items-center gap-0.5">
+                  {[1, 2, 3].map((s) => (
+                    <span key={s} className="text-xs"
+                      style={{ filter: (progress?.stars ?? 0) >= s ? 'none' : 'grayscale(1) opacity(0.3)' }}
+                    >⭐</span>
+                  ))}
+                </div>
+                {/* Dimsum */}
+                <div className="flex items-center gap-1">
+                  <img src={dimsumImg} alt="" className="w-3.5 h-3.5" />
+                  <span className="text-[10px] font-bold text-amber-400">
+                    {progress?.dimsumCollected ?? 0}/{level.dimsumCount}
+                  </span>
+                </div>
+                {/* Time */}
+                {progress?.bestTime && (
+                  <span className="text-[10px] text-purple-400">⏱ {Math.floor(progress.bestTime)}s</span>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center gap-1 mt-0.5">
+              <span className="text-xs">⭐</span>
+              <span className="text-[10px] text-purple-400">Need {level.unlockRequirement} stars (You: {totalStars})</span>
+            </div>
+          )}
+        </div>
+
+        {/* Play Arrow */}
+        {unlocked && (
+          <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+            style={{
+              background: 'rgba(245,158,11,0.15)',
+              border: '1px solid rgba(255,215,0,0.2)',
+            }}
+          >
+            <span className="text-amber-400 text-xs font-black">▶</span>
           </div>
         )}
       </div>
-    </div>
-  </button>
-);
-
-function formatTime(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, '0')}`;
-}
+    </button>
+  );
+};

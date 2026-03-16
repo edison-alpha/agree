@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import chestOpen from '../../assets/underwater/Neutral/\u00e6hest_open.webp';
 import bubbleImg from '../../assets/underwater/Neutral/Bubble_2.webp';
 import energyImg from '../../assets/energy-pack/energy/10.webp';
+import arenaBg from '../../assets/arena_background.webp';
 
 interface GameOverScreenProps {
   score: number;
@@ -24,11 +25,14 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({ score, onRestart
     <div
       className="absolute inset-0 z-50 flex items-center justify-center"
       style={{
-        background: 'radial-gradient(ellipse at center, rgba(30,10,40,0.95) 0%, rgba(0,0,0,0.98) 100%)',
-        backdropFilter: 'blur(12px)',
+        backgroundImage: `url(${arenaBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
         padding: 'max(16px, env(safe-area-inset-top, 16px)) max(16px, env(safe-area-inset-right, 16px)) max(16px, env(safe-area-inset-bottom, 16px)) max(16px, env(safe-area-inset-left, 16px))',
       }}
     >
+      {/* Dark overlay for readability */}
+      <div className="absolute inset-0 bg-black/50 pointer-events-none" />
       {/* Floating bubbles background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {[...Array(6)].map((_, i) => (
@@ -51,7 +55,7 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({ score, onRestart
       <div
         className="relative w-full max-w-md overflow-hidden rounded-3xl p-6 text-center sm:p-8"
         style={{
-          background: 'linear-gradient(145deg, rgba(23,23,23,0.97) 0%, rgba(30,15,35,0.95) 100%)',
+          background: 'linear-gradient(145deg, rgba(45,27,105,0.95) 0%, rgba(26,13,64,0.97) 100%)',
           border: '1px solid rgba(239,68,68,0.2)',
           boxShadow: '0 25px 60px rgba(0,0,0,0.5), 0 0 80px rgba(239,68,68,0.08), inset 0 1px 0 rgba(255,255,255,0.06)',
         }}

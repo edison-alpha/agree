@@ -3,9 +3,13 @@ import type { GameStoreData } from '../../store/gameStore';
 import { getTotalStars, getCompletedLevels, getTicketProgress } from '../../store/gameStore';
 import { LEVELS, getMaxStars } from '../../constants/levels';
 import dimsumImg from '../../assets/dimsum.png';
-import bubbleImg from '../../assets/underwater/Neutral/Bubble_2.webp';
 import chestClosed from '../../assets/underwater/Neutral/æhest_closed.webp';
+import coinImg from '../../assets/underwater/Bonus/Coin.webp';
+import crownImg from '../../assets/underwater/Bonus/Crown.webp';
 import heartImg from '../../assets/underwater/Bonus/Heart.webp';
+import shieldImg from '../../assets/underwater/Bonus/Shield.webp';
+import pearlImg from '../../assets/underwater/Bonus/Pearl.webp';
+import arenaBg from '../../assets/arena_background.webp';
 
 interface MainMenuScreenProps {
   storeData: GameStoreData;
@@ -34,174 +38,242 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
   const ticketProgress = getTicketProgress(storeData);
 
   return (
-    <div
-      className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+    <div className="absolute inset-0 z-50 flex flex-col overflow-hidden"
       style={{
-        padding: 'max(16px, env(safe-area-inset-top, 16px)) max(16px, env(safe-area-inset-right, 16px)) max(16px, env(safe-area-inset-bottom, 16px)) max(16px, env(safe-area-inset-left, 16px))',
+        backgroundImage: `url(${arenaBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        paddingTop: 'max(8px, env(safe-area-inset-top, 8px))',
+        paddingBottom: 'max(8px, env(safe-area-inset-bottom, 8px))',
       }}
     >
-      {/* Floating dimsum bg */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(6)].map((_, i) => (
-          <img
-            key={i}
-            src={bubbleImg}
-            alt=""
-            className="absolute opacity-[0.06]"
-            style={{
-              width: `${20 + i * 8}px`,
-              left: `${10 + i * 15}%`,
-              bottom: `-${20 + i * 10}px`,
-              animation: `float-up ${7 + i * 2}s ease-in-out infinite`,
-              animationDelay: `${i * 0.5}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="relative w-full max-w-md flex flex-col items-center gap-3 sm:gap-4">
-        {/* Logo */}
-        <div className="text-center mb-1">
-          <img
-            src={dimsumImg}
-            alt="Dimsum"
-            className="mx-auto h-20 w-20 sm:h-24 sm:w-24 mb-2"
-            style={{ filter: 'drop-shadow(0 4px 16px rgba(251,191,36,0.35))' }}
-          />
-          <h1 className="text-3xl font-black uppercase tracking-[0.12em] text-yellow-400 sm:text-4xl"
-            style={{ textShadow: '0 2px 12px rgba(250,204,21,0.3)' }}
-          >
-            Dimsum Dash
-          </h1>
-          <p className="text-xs text-zinc-400 mt-0.5">Collect • Battle • Unlock</p>
-        </div>
-
-        {/* Profile Card */}
-        <div className="w-full rounded-[22px] border border-white/10 bg-[#171717]/95 p-3 flex items-center gap-3 shadow-xl">
-          <div
-            className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-yellow-500"
-            style={{ border: '2px solid rgba(250,204,21,0.4)' }}
-          >
-            {profilePhoto ? (
-              <img src={profilePhoto} alt={playerName} className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-lg font-black text-black">{playerName.charAt(0).toUpperCase()}</span>
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="font-bold text-white text-sm truncate">{playerName}</div>
-            <div className="flex items-center gap-2.5 text-[10px] text-zinc-500">
-              <span>⭐ {totalStars}/{maxStars}</span>
-              <span className="flex items-center gap-0.5">
-                <img src={dimsumImg} alt="" className="h-3 w-3" /> {storeData.totalDimsum}
-              </span>
-              <span>🎫 {storeData.tickets}</span>
+      {/* Dark overlay for readability */}
+      <div className="absolute inset-0 bg-black/50 pointer-events-none" />
+      {/* ── Top HUD Bar ── */}
+      <div className="relative z-10 flex items-center gap-2 px-3 py-1.5 mx-2 mb-2 rounded-2xl"
+        style={{
+          background: 'rgba(0,0,0,0.5)',
+          border: '1px solid rgba(255,215,0,0.15)',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.4)',
+        }}
+      >
+        {/* Avatar */}
+        <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0"
+          style={{
+            border: '2px solid rgba(255,215,0,0.5)',
+            boxShadow: '0 0 8px rgba(255,215,0,0.2)',
+          }}
+        >
+          {profilePhoto ? (
+            <img src={profilePhoto} alt="" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-purple-900 text-amber-400 font-black text-sm">
+              {playerName.charAt(0).toUpperCase()}
             </div>
-          </div>
-          <button
-            onClick={onSettings}
-            className="w-8 h-8 rounded-xl flex items-center justify-center bg-white/5 border border-white/10 transition active:scale-90"
-          >
-            <span className="text-base">⚙️</span>
-          </button>
+          )}
         </div>
 
         {/* Stats Row */}
-        <div className="w-full grid grid-cols-3 gap-2">
-          {[
-            { label: 'Levels', value: `${completedLevels}/${LEVELS.length}`, spriteIcon: null, emoji: '📋', color: 'text-blue-400' },
-            { label: 'Dimsum', value: storeData.totalDimsum.toString(), spriteIcon: dimsumImg, emoji: '', color: 'text-yellow-400' },
-            { label: 'Tickets', value: storeData.tickets.toString(), spriteIcon: chestClosed, emoji: '', color: 'text-purple-400' },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              className="rounded-2xl border border-white/10 bg-[#171717]/95 p-2.5 text-center shadow-lg"
-            >
-              {stat.spriteIcon ? (
-                <img src={stat.spriteIcon} alt="" className="mx-auto h-5 w-5 mb-0.5" style={{ filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.4))' }} />
-              ) : (
-                <div className="text-base mb-0.5">{stat.emoji}</div>
-              )}
-              <div className={`text-base font-black ${stat.color}`}>{stat.value}</div>
-              <div className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-500">{stat.label}</div>
-            </div>
-          ))}
+        <div className="flex items-center gap-2 flex-1 overflow-x-auto">
+          <StatBadge icon={<img src={dimsumImg} alt="" className="w-4 h-4" />} value={storeData.totalDimsum} />
+          <StatBadge icon={<span className="text-xs">⭐</span>} value={totalStars} />
+          <StatBadge icon={<img src={chestClosed} alt="" className="w-4 h-4" />} value={storeData.tickets} />
         </div>
 
-        {/* Ticket Progress */}
-        <div className="w-full rounded-2xl border border-white/10 bg-[#171717]/95 p-3 shadow-lg">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-yellow-400/70">Next Ticket</span>
-            <span className="text-[10px] font-bold text-zinc-400 flex items-center gap-1">
-              <img src={dimsumImg} alt="" className="h-3 w-3" />
-              {ticketProgress.current}/{ticketProgress.needed}
-            </span>
-          </div>
-          <div className="w-full h-2 rounded-full overflow-hidden bg-zinc-800">
-            <div
-              className="h-full rounded-full transition-all duration-500"
-              style={{
-                width: `${(ticketProgress.current / ticketProgress.needed) * 100}%`,
-                background: 'linear-gradient(90deg, #eab308, #f59e0b)',
-                boxShadow: '0 0 6px rgba(234,179,8,0.3)',
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Main Play Button */}
-        <button
-          onClick={onPlay}
-          className="w-full rounded-2xl bg-yellow-500 py-3.5 text-base font-black uppercase tracking-[0.22em] text-black shadow-lg transition hover:bg-yellow-400 active:scale-[0.97] sm:py-4"
-          style={{ boxShadow: '0 6px 20px rgba(234,179,8,0.3)' }}
+        {/* Settings */}
+        <button onClick={onSettings} className="w-8 h-8 rounded-xl flex items-center justify-center transition active:scale-90"
+          style={{
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,215,0,0.15)',
+          }}
         >
-          🎮 Play
+          <span className="text-sm">⚙️</span>
+        </button>
+      </div>
+
+      {/* ── Main Content ── */}
+      <div className="relative z-10 flex-1 flex flex-col items-center px-4 overflow-y-auto">
+        {/* Player Card */}
+        <div className="w-full rounded-2xl p-4 mb-3 relative overflow-hidden"
+          style={{
+            background: 'rgba(0,0,0,0.45)',
+            border: '1px solid rgba(255,215,0,0.2)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+          }}
+        >
+          <div className="absolute top-0 right-0 w-24 h-24 opacity-10">
+            <img src={crownImg} alt="" className="w-full h-full object-contain" />
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="w-14 h-14 rounded-2xl overflow-hidden flex-shrink-0"
+              style={{
+                border: '2px solid rgba(255,215,0,0.4)',
+                boxShadow: '0 0 12px rgba(255,215,0,0.15)',
+              }}
+            >
+              {profilePhoto ? (
+                <img src={profilePhoto} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-purple-800 text-amber-400 font-black text-xl">
+                  {playerName.charAt(0).toUpperCase()}
+                </div>
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-base font-black text-white truncate">{playerName}</h2>
+              <div className="text-[10px] font-bold text-amber-400/70 uppercase tracking-wider">Dimsum Collector</div>
+              <div className="flex items-center gap-3 mt-1">
+                <span className="text-[10px] text-purple-300">⭐ {totalStars}/{maxStars}</span>
+                <span className="text-[10px] text-purple-300">✅ {completedLevels}/{LEVELS.length}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Ticket Progress Bar */}
+          <div className="mt-3 rounded-xl p-2"
+            style={{
+              background: 'rgba(0,0,0,0.3)',
+              border: '1px solid rgba(255,215,0,0.1)',
+            }}
+          >
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[9px] font-bold text-amber-400/70 uppercase tracking-wider">Next Ticket</span>
+              <span className="text-[9px] font-bold text-purple-300">{ticketProgress.current}/{ticketProgress.needed} 🥟</span>
+            </div>
+            <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
+              <div className="h-full rounded-full transition-all duration-500"
+                style={{
+                  width: `${(ticketProgress.current / ticketProgress.needed) * 100}%`,
+                  background: 'linear-gradient(90deg, #f59e0b, #fbbf24, #f59e0b)',
+                  boxShadow: '0 0 8px rgba(245,158,11,0.4)',
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* ── Play Button ── */}
+        <button onClick={onPlay}
+          className="w-full py-4 rounded-2xl text-base font-black uppercase tracking-widest text-black mb-3 transition active:scale-[0.97] relative overflow-hidden"
+          style={{
+            background: 'linear-gradient(180deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%)',
+            border: '2px solid rgba(255,255,255,0.2)',
+            boxShadow: '0 4px 20px rgba(245,158,11,0.4), inset 0 2px 0 rgba(255,255,255,0.3)',
+          }}
+        >
+          <span className="relative z-10">⚔️ Battle</span>
+          <div className="absolute inset-0 opacity-20" style={{
+            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
+            animation: 'shimmer 2s ease-in-out infinite',
+          }} />
         </button>
 
-        {/* Secondary Buttons */}
-        <div className="w-full grid grid-cols-3 gap-2">
-          <MenuButton icon="🏆" label="Leaderboard" onClick={onLeaderboard} />
-          <MenuButton icon="" label="Inventory" onClick={onInventory} spriteIcon={heartImg} />
-          <MenuButton icon="" label="Mystery Box" onClick={onMysteryBox} spriteIcon={chestClosed} badge={storeData.tickets > 0 ? storeData.tickets : undefined} />
+        {/* ── Quick Stats Grid ── */}
+        <div className="grid grid-cols-2 gap-2 w-full mb-3">
+          <QuickStatCard icon={dimsumImg} label="Total Dimsum" value={storeData.totalDimsum} color="#fbbf24" />
+          <QuickStatCard icon={coinImg} label="Tickets" value={storeData.tickets} color="#a78bfa" />
+        </div>
+
+        {/* ── Menu Buttons Grid ── */}
+        <div className="grid grid-cols-2 gap-2 w-full mb-4">
+          <MenuButton icon={crownImg} label="Leaderboard" badge={null} onClick={onLeaderboard} />
+          <MenuButton icon={shieldImg} label="Inventory" badge={storeData.inventory.length > 0 ? storeData.inventory.length : null} onClick={onInventory} />
+          <MenuButton icon={chestClosed} label="Mystery Box" badge={storeData.tickets > 0 ? storeData.tickets : null} onClick={onMysteryBox} />
+          <MenuButton icon={pearlImg} label="Rewards" badge={storeData.mysteryBoxRewards.length > 0 ? storeData.mysteryBoxRewards.length : null} onClick={() => onInventory()} />
         </div>
       </div>
 
+      {/* ── Bottom Navigation Bar ── */}
+      <div className="relative z-10 flex items-center justify-around px-2 py-1.5 mx-2 rounded-2xl"
+        style={{
+          background: 'rgba(0,0,0,0.6)',
+          border: '1px solid rgba(255,215,0,0.15)',
+          boxShadow: '0 -2px 12px rgba(0,0,0,0.3)',
+        }}
+      >
+        <NavButton icon="⚔️" label="Battle" active onClick={onPlay} />
+        <NavButton icon="🏆" label="Rank" onClick={onLeaderboard} />
+        <NavButton icon="🎒" label="Items" onClick={onInventory} />
+        <NavButton icon="🎁" label="Box" badge={storeData.tickets > 0} onClick={onMysteryBox} />
+        <NavButton icon="⚙️" label="More" onClick={onSettings} />
+      </div>
+
       <style>{`
-        @keyframes float-up {
-          0%, 100% { transform: translateY(0) scale(1); opacity: 0.06; }
-          50% { transform: translateY(-${window.innerHeight}px) scale(0.5); opacity: 0; }
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
         }
       `}</style>
     </div>
   );
 };
 
-interface MenuButtonProps {
-  icon: string;
-  label: string;
-  onClick: () => void;
-  spriteIcon?: string;
-  badge?: number;
-}
+/* ─── Sub Components ─────────────────────────────────────────────────────── */
 
-const MenuButton: React.FC<MenuButtonProps> = ({ icon, label, onClick, spriteIcon, badge }) => (
-  <button
-    onClick={onClick}
-    className="relative rounded-2xl border border-white/10 bg-[#171717]/95 py-3 flex flex-col items-center gap-1 transition active:scale-[0.95] shadow-lg"
+const StatBadge: React.FC<{ icon: React.ReactNode; value: number | string }> = ({ icon, value }) => (
+  <div className="flex items-center gap-1 rounded-lg px-2 py-0.5"
+    style={{
+      background: 'rgba(0,0,0,0.3)',
+      border: '1px solid rgba(255,215,0,0.1)',
+    }}
   >
-    {spriteIcon ? (
-      <img src={spriteIcon} alt="" className="h-5 w-5" style={{ filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.4))' }} />
-    ) : (
-      <span className="text-lg">{icon}</span>
-    )}
-    <span className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400">{label}</span>
-    {badge !== undefined && (
-      <div
-        className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black text-white bg-red-500"
-        style={{ boxShadow: '0 2px 4px rgba(239,68,68,0.4)' }}
-      >
-        {badge}
+    {icon}
+    <span className="text-xs font-black text-amber-400">{value}</span>
+  </div>
+);
+
+const QuickStatCard: React.FC<{ icon: string; label: string; value: number; color: string }> = ({ icon, label, value, color }) => (
+  <div className="rounded-xl p-3 relative overflow-hidden"
+    style={{
+      background: 'rgba(0,0,0,0.4)',
+      border: '1px solid rgba(255,215,0,0.12)',
+    }}
+  >
+    <div className="flex items-center gap-2">
+      <img src={icon} alt="" className="w-8 h-8" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+      <div>
+        <div className="text-lg font-black" style={{ color }}>{value}</div>
+        <div className="text-[8px] font-bold text-purple-300/70 uppercase tracking-wider">{label}</div>
       </div>
+    </div>
+  </div>
+);
+
+const MenuButton: React.FC<{ icon: string; label: string; badge: number | null; onClick: () => void }> = ({ icon, label, badge, onClick }) => (
+  <button onClick={onClick}
+    className="relative rounded-xl p-3 flex items-center gap-2 transition active:scale-[0.97]"
+    style={{
+      background: 'rgba(0,0,0,0.35)',
+      border: '1px solid rgba(255,215,0,0.12)',
+    }}
+  >
+    <img src={icon} alt="" className="w-7 h-7" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+    <span className="text-xs font-bold text-purple-200">{label}</span>
+    {badge !== null && (
+      <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black text-black"
+        style={{ background: 'linear-gradient(180deg, #f87171, #dc2626)' }}
+      >{badge}</div>
+    )}
+  </button>
+);
+
+const NavButton: React.FC<{ icon: string; label: string; active?: boolean; badge?: boolean; onClick: () => void }> = ({ icon, label, active, badge, onClick }) => (
+  <button onClick={onClick}
+    className="relative flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition active:scale-90"
+    style={active ? {
+      background: 'rgba(245,158,11,0.1)',
+      boxShadow: '0 0 8px rgba(245,158,11,0.1)',
+    } : {}}
+  >
+    <span className="text-lg">{icon}</span>
+    <span className={`text-[8px] font-bold uppercase tracking-wider ${active ? 'text-amber-400' : 'text-purple-400'}`}>{label}</span>
+    {active && (
+      <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full" style={{ background: '#f59e0b' }} />
+    )}
+    {badge && (
+      <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full"
+        style={{ background: 'linear-gradient(180deg, #f87171, #dc2626)', boxShadow: '0 0 4px rgba(248,113,113,0.5)' }}
+      />
     )}
   </button>
 );

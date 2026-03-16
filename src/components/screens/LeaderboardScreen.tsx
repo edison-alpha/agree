@@ -2,15 +2,14 @@ import React, { useMemo } from 'react';
 import type { GameStoreData, LeaderboardEntry } from '../../store/gameStore';
 import { getLeaderboard } from '../../store/gameStore';
 import dimsumImg from '../../assets/dimsum.png';
-import bubbleImg from '../../assets/underwater/Neutral/Bubble_2.webp';
+import crownImg from '../../assets/underwater/Bonus/Crown.webp';
+import arenaBg from '../../assets/arena_background.webp';
 
 interface LeaderboardScreenProps {
   storeData: GameStoreData;
   currentPlayerName: string;
   onBack: () => void;
 }
-
-const RANK_BADGES = ['🥇', '🥈', '🥉'];
 
 export const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({
   storeData,
@@ -20,44 +19,40 @@ export const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({
   const entries = useMemo(() => getLeaderboard(storeData), [storeData]);
 
   return (
-    <div
-      className="absolute inset-0 z-50 flex flex-col bg-[#111]/95 backdrop-blur-sm"
+    <div className="absolute inset-0 z-50 flex flex-col overflow-hidden"
       style={{
-        paddingBottom: 'max(12px, env(safe-area-inset-bottom, 12px))',
-        paddingTop: 'max(12px, env(safe-area-inset-top, 12px))',
+        backgroundImage: `url(${arenaBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        paddingTop: 'max(8px, env(safe-area-inset-top, 8px))',
+        paddingBottom: 'max(8px, env(safe-area-inset-bottom, 8px))',
       }}
     >
-      {/* Floating bg */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(4)].map((_, i) => (
-          <img key={i} src={bubbleImg} alt="" className="absolute opacity-[0.04]"
-            style={{
-              width: `${16 + i * 5}px`,
-              left: `${10 + i * 20}%`,
-              bottom: `-10px`,
-              animation: `float-up ${7 + i * 2}s ease-in-out infinite`,
-              animationDelay: `${i * 0.6}s`,
-            }}
-          />
-        ))}
+      <div className="absolute inset-0 bg-black/50 pointer-events-none" />
+      {/* Header */}
+      <div className="relative z-10 flex items-center gap-3 px-4 py-2 mx-2 mb-2 rounded-2xl"
+        style={{
+          background: 'rgba(0,0,0,0.5)',
+          border: '1px solid rgba(255,215,0,0.15)',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.4)',
+        }}
+      >
+        <button onClick={onBack} className="w-8 h-8 rounded-xl flex items-center justify-center transition active:scale-90"
+          style={{ background: 'rgba(255,215,0,0.08)', border: '1px solid rgba(255,215,0,0.15)' }}
+        >
+          <span className="text-sm">←</span>
+        </button>
+        <div className="flex-1 flex items-center justify-center gap-2">
+          <img src={crownImg} alt="" className="w-5 h-5" />
+          <span className="text-xs font-black uppercase tracking-[0.25em] text-amber-400">Leaderboard</span>
+        </div>
+        <div className="w-8" />
       </div>
 
-      <div className="relative flex min-h-0 flex-1 flex-col px-4 sm:mx-auto sm:max-w-2xl sm:px-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-3 shrink-0 pt-1">
-          <button
-            onClick={onBack}
-            className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/5 border border-white/10 transition active:scale-90"
-          >
-            <span className="text-base">←</span>
-          </button>
-          <div className="text-[10px] font-black uppercase tracking-[0.35em] text-yellow-400">🏆 Leaderboard</div>
-          <div className="w-9" />
-        </div>
-
+      <div className="relative z-10 flex-1 min-h-0 flex flex-col px-4">
         {/* Top 3 Podium */}
         {entries.length >= 3 && (
-          <div className="flex items-end justify-center gap-1.5 mb-3 shrink-0 px-1">
+          <div className="flex items-end justify-center gap-2 mb-3 flex-shrink-0">
             <PodiumCard entry={entries[1]} rank={2} />
             <PodiumCard entry={entries[0]} rank={1} />
             <PodiumCard entry={entries[2]} rank={3} />
@@ -68,9 +63,9 @@ export const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({
         <div className="flex-1 min-h-0 overflow-y-auto space-y-1.5 pb-3">
           {entries.length === 0 && (
             <div className="text-center py-12">
-              <img src={dimsumImg} alt="" className="mx-auto h-14 w-14 mb-3 opacity-40" />
-              <p className="text-zinc-400 text-sm">No entries yet!</p>
-              <p className="text-zinc-500 text-xs mt-1">Play levels to appear here</p>
+              <img src={dimsumImg} alt="" className="mx-auto h-12 w-12 mb-3 opacity-30" />
+              <p className="text-purple-300 text-sm font-bold">No entries yet!</p>
+              <p className="text-purple-400/60 text-xs mt-1">Play levels to appear here</p>
             </div>
           )}
           {entries.map((entry, index) => {
@@ -86,80 +81,94 @@ export const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({
           })}
         </div>
       </div>
-
-      <style>{`
-        @keyframes float-up {
-          0%, 100% { transform: translateY(0) scale(1); opacity: 0.04; }
-          50% { transform: translateY(-${window.innerHeight}px) scale(0.5); opacity: 0; }
-        }
-      `}</style>
     </div>
   );
 };
 
-const PodiumCard: React.FC<{ entry: LeaderboardEntry; rank: number }> = ({ entry, rank }) => {
-  const heights = [100, 80, 64];
-  const height = heights[rank - 1] || 50;
+/* ─── Podium Card ────────────────────────────────────────────────────────── */
 
-  return (
-    <div className="flex flex-col items-center" style={{ width: rank === 1 ? '36%' : '30%' }}>
-      <div
-        className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center mb-0.5 bg-yellow-500 sm:w-11 sm:h-11"
-        style={{ border: rank === 1 ? '2px solid #eab308' : '2px solid rgba(255,255,255,0.15)' }}
-      >
-        {entry.profilePhoto ? (
-          <img src={entry.profilePhoto} alt="" className="w-full h-full object-cover" />
-        ) : (
-          <span className="text-xs font-black text-black">{entry.playerName.charAt(0).toUpperCase()}</span>
-        )}
-      </div>
-      <span className="text-[9px] font-bold text-zinc-300 truncate w-full text-center">{entry.playerName}</span>
-      <span className="text-base">{RANK_BADGES[rank - 1]}</span>
-      <div
-        className="w-full rounded-t-xl border border-white/10 border-b-0 bg-[#171717]/95 flex flex-col items-center justify-center"
-        style={{ height: `${height}px` }}
-      >
-        <div className="flex items-center gap-1">
-          <img src={dimsumImg} alt="" className="h-4 w-4" />
-          <span className="text-sm font-black text-yellow-400">{entry.totalDimsum}</span>
-        </div>
-        <span className="text-[8px] text-zinc-500 font-bold">⭐ {entry.totalStars}</span>
-      </div>
-    </div>
-  );
-};
+const RANK_BADGES = ['🥇', '🥈', '🥉'];
+const PODIUM_HEIGHTS = [110, 85, 68];
+const PODIUM_BORDERS = [
+  'rgba(255,215,0,0.3)',
+  'rgba(168,162,158,0.2)',
+  'rgba(180,120,60,0.2)',
+];
 
-const LeaderboardRow: React.FC<{ entry: LeaderboardEntry; rank: number; isCurrentPlayer: boolean }> = ({ entry, rank, isCurrentPlayer }) => (
-  <div
-    className={`flex items-center gap-2.5 rounded-[18px] p-2.5 border shadow-lg
-      ${isCurrentPlayer
-        ? 'border-yellow-400/20 bg-yellow-500/5'
-        : 'border-white/10 bg-[#171717]/95'
-      }`}
-  >
-    <div className="w-7 text-center">
-      <span className="text-xs font-black text-zinc-500">#{rank}</span>
-    </div>
-    <div
-      className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0 bg-white/10 border border-white/15"
+const PodiumCard: React.FC<{ entry: LeaderboardEntry; rank: number }> = ({ entry, rank }) => (
+  <div className="flex flex-col items-center" style={{ width: rank === 1 ? '36%' : '30%' }}>
+    {/* Avatar */}
+    <div className="w-10 h-10 rounded-full overflow-hidden mb-0.5"
+      style={{
+        border: `2px solid ${PODIUM_BORDERS[rank - 1]}`,
+        boxShadow: rank === 1 ? '0 0 12px rgba(255,215,0,0.3)' : 'none',
+      }}
     >
       {entry.profilePhoto ? (
         <img src={entry.profilePhoto} alt="" className="w-full h-full object-cover" />
       ) : (
-        <span className="text-[10px] font-bold text-white">{entry.playerName.charAt(0).toUpperCase()}</span>
+        <div className="w-full h-full flex items-center justify-center bg-purple-800 text-amber-400 font-black text-sm">
+          {entry.playerName.charAt(0).toUpperCase()}
+        </div>
+      )}
+    </div>
+    <span className="text-[9px] font-bold text-purple-200 truncate w-full text-center mb-0.5">{entry.playerName}</span>
+    <span className="text-lg mb-0.5">{RANK_BADGES[rank - 1]}</span>
+
+    {/* Podium */}
+    <div className="w-full rounded-t-xl flex flex-col items-center justify-center"
+      style={{
+        height: `${PODIUM_HEIGHTS[rank - 1]}px`,
+        background: 'rgba(0,0,0,0.4)',
+        border: `1px solid ${PODIUM_BORDERS[rank - 1]}`,
+        borderBottom: 'none',
+      }}
+    >
+      <div className="flex items-center gap-1 mb-0.5">
+        <img src={dimsumImg} alt="" className="h-4 w-4" />
+        <span className="text-sm font-black text-amber-400">{entry.totalDimsum}</span>
+      </div>
+      <span className="text-[8px] text-purple-400">⭐ {entry.totalStars}</span>
+    </div>
+  </div>
+);
+
+/* ─── Leaderboard Row ────────────────────────────────────────────────────── */
+
+const LeaderboardRow: React.FC<{ entry: LeaderboardEntry; rank: number; isCurrentPlayer: boolean }> = ({ entry, rank, isCurrentPlayer }) => (
+  <div className="flex items-center gap-2.5 rounded-xl p-2.5"
+    style={{
+      background: isCurrentPlayer ? 'rgba(245,158,11,0.08)' : 'rgba(0,0,0,0.35)',
+      border: isCurrentPlayer
+        ? '1px solid rgba(255,215,0,0.2)'
+        : '1px solid rgba(255,215,0,0.08)',
+    }}
+  >
+    <div className="w-7 text-center">
+      <span className="text-xs font-black text-purple-400">#{rank}</span>
+    </div>
+    <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0"
+      style={{ border: '1px solid rgba(255,215,0,0.15)' }}
+    >
+      {entry.profilePhoto ? (
+        <img src={entry.profilePhoto} alt="" className="w-full h-full object-cover" />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center bg-purple-800 text-xs font-bold text-purple-300">
+          {entry.playerName.charAt(0).toUpperCase()}
+        </div>
       )}
     </div>
     <div className="flex-1 min-w-0">
       <div className="text-xs font-bold text-white truncate">
-        {entry.playerName} {isCurrentPlayer && <span className="text-yellow-400">(You)</span>}
+        {entry.playerName} {isCurrentPlayer && <span className="text-amber-400">(You)</span>}
       </div>
-      <div className="text-[9px] text-zinc-500">
+      <div className="text-[9px] text-purple-400">
         {entry.levelsCompleted} levels • ⭐ {entry.totalStars}
       </div>
     </div>
     <div className="flex items-center gap-1">
       <img src={dimsumImg} alt="" className="h-3.5 w-3.5" />
-      <span className="text-sm font-black text-yellow-400">{entry.totalDimsum}</span>
+      <span className="text-sm font-black text-amber-400">{entry.totalDimsum}</span>
     </div>
   </div>
 );

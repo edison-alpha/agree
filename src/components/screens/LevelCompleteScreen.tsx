@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { calculateStars } from '../../store/gameStore';
 import type { LevelConfig } from '../../constants/levels';
 import dimsumImg from '../../assets/dimsum.png';
-import bubbleImg from '../../assets/underwater/Neutral/Bubble_2.webp';
+import crownImg from '../../assets/underwater/Bonus/Crown.webp';
+import chestOpen from '../../assets/underwater/Neutral/æhest_open.webp';
+import arenaBg from '../../assets/arena_background.webp';
 
 interface LevelCompleteScreenProps {
   levelConfig: LevelConfig;
@@ -39,146 +41,174 @@ export const LevelCompleteScreen: React.FC<LevelCompleteScreenProps> = ({
   useEffect(() => {
     const timers: number[] = [];
     for (let i = 1; i <= stars; i++) {
-      timers.push(window.setTimeout(() => setShowStars(i), i * 400));
+      timers.push(window.setTimeout(() => setShowStars(i), i * 500));
     }
-    timers.push(window.setTimeout(() => setShowContent(true), stars * 400 + 200));
+    timers.push(window.setTimeout(() => setShowContent(true), stars * 500 + 300));
     return () => timers.forEach(clearTimeout);
   }, [stars]);
 
   return (
-    <div className="absolute inset-0 z-50 flex flex-col bg-black/90 backdrop-blur-md"
+    <div className="absolute inset-0 z-50 flex flex-col overflow-hidden"
       style={{
-        paddingBottom: 'max(16px, env(safe-area-inset-bottom, 16px))',
+        backgroundImage: `url(${arenaBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
         paddingTop: 'max(12px, env(safe-area-inset-top, 12px))',
+        paddingBottom: 'max(12px, env(safe-area-inset-bottom, 12px))',
       }}
     >
-      {/* Floating bg */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(5)].map((_, i) => (
-          <img key={i} src={bubbleImg} alt="" className="absolute opacity-[0.04]"
-            style={{
-              width: `${14 + i * 4}px`,
-              left: `${5 + i * 20}%`,
-              bottom: `-12px`,
-              animation: `float-up ${6 + i * 2}s ease-in-out infinite`,
-              animationDelay: `${i * 0.5}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="relative flex min-h-0 flex-1 flex-col items-center px-4 sm:mx-auto sm:max-w-2xl sm:px-6 overflow-y-auto">
+      <div className="absolute inset-0 bg-black/50 pointer-events-none" />
+      <div className="relative z-10 flex-1 flex flex-col items-center px-4 overflow-y-auto sm:mx-auto sm:max-w-2xl">
         {/* Title */}
-        <div className="text-center mt-6 mb-2 shrink-0">
-          <div className="text-[10px] font-black uppercase tracking-[0.35em] text-yellow-400/70 mb-1">
+        <div className="text-center mt-6 mb-3 flex-shrink-0">
+          {isPerfect && <img src={crownImg} alt="" className="mx-auto h-8 w-8 mb-1" style={{ filter: 'drop-shadow(0 2px 8px rgba(255,215,0,0.4))' }} />}
+          <div className="text-[10px] font-bold uppercase tracking-[0.35em] mb-1"
+            style={{ color: isPerfect ? '#fbbf24' : '#a78bfa' }}
+          >
             {isPerfect ? '⭐ PERFECT CLEAR ⭐' : 'Level Complete'}
           </div>
-          <h1 className="text-2xl font-black text-white mb-0.5">{levelConfig.name}</h1>
+          <h1 className="text-2xl font-black text-white">{levelConfig.name}</h1>
         </div>
 
         {/* Stars */}
-        <div className="flex items-center gap-3 mb-5 shrink-0">
+        <div className="flex items-center gap-4 mb-5 flex-shrink-0">
           {[1, 2, 3].map((s) => (
-            <div key={s} className="relative transition-all duration-300"
+            <div key={s} className="transition-all duration-500"
               style={{
-                transform: showStars >= s ? 'scale(1)' : 'scale(0.3)',
-                opacity: showStars >= s ? 1 : 0.2,
+                transform: showStars >= s ? 'scale(1) rotate(0deg)' : 'scale(0.3) rotate(-30deg)',
+                opacity: showStars >= s ? 1 : 0.15,
               }}
             >
-              <span className="text-3xl" style={{
-                filter: showStars >= s ? 'drop-shadow(0 0 6px rgba(250,204,21,0.5))' : 'grayscale(1)',
+              <span className="text-4xl" style={{
+                filter: showStars >= s ? 'drop-shadow(0 0 10px rgba(255,215,0,0.6))' : 'grayscale(1)',
               }}>⭐</span>
             </div>
           ))}
         </div>
 
         {/* Content (fades in after stars) */}
-        <div className={`w-full space-y-3 transition-opacity duration-500 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
-          {/* Dimsum Collected */}
-          <div className="rounded-[22px] border border-white/10 bg-[#171717]/95 p-4 shadow-xl">
-            <div className="text-[10px] font-black uppercase tracking-[0.25em] text-zinc-400 mb-2 text-center">
+        <div className={`w-full space-y-3 transition-all duration-600 ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          {/* Dimsum Collected Card */}
+          <div className="rounded-2xl p-4 relative overflow-hidden"
+            style={{
+              background: 'rgba(0,0,0,0.45)',
+              border: '1px solid rgba(255,215,0,0.2)',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+            }}
+          >
+            <div className="text-[10px] font-bold text-amber-400/60 uppercase tracking-wider mb-2 text-center">
               Dimsum Collected
             </div>
             <div className="flex items-center justify-center flex-wrap gap-1.5 mb-2">
               {Array.from({ length: levelConfig.dimsumCount }).map((_, i) => (
-                <div key={i} className={`w-9 h-9 rounded-xl flex items-center justify-center border transition-all ${
-                  i < dimsumCollected
-                    ? 'border-yellow-400/30 bg-yellow-500/15'
-                    : 'border-white/10 bg-white/5'
-                }`}>
+                <div key={i} className="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
+                  style={{
+                    background: i < dimsumCollected
+                      ? 'rgba(245,158,11,0.12)'
+                      : 'rgba(255,255,255,0.02)',
+                    border: i < dimsumCollected
+                      ? '1px solid rgba(255,215,0,0.25)'
+                      : '1px solid rgba(255,215,0,0.06)',
+                    boxShadow: i < dimsumCollected ? '0 0 8px rgba(245,158,11,0.1)' : 'none',
+                  }}
+                >
                   <img src={dimsumImg} alt="" className={`h-5 w-5 transition ${i < dimsumCollected ? '' : 'opacity-15 grayscale'}`} />
                 </div>
               ))}
             </div>
             <div className="text-center">
-              <span className="text-2xl font-black text-yellow-400">{dimsumCollected}</span>
-              <span className="text-base font-black text-zinc-500"> / {levelConfig.dimsumCount}</span>
+              <span className="text-3xl font-black text-amber-400">{dimsumCollected}</span>
+              <span className="text-lg font-black text-purple-400"> / {levelConfig.dimsumCount}</span>
             </div>
           </div>
 
-          {/* Stats */}
+          {/* Stats Row */}
           <div className="grid grid-cols-2 gap-2">
-            <div className="rounded-2xl border border-white/10 bg-[#171717]/95 p-3 text-center shadow-lg">
-              <div className="text-sm font-black text-white">{mins > 0 ? `${mins}m ` : ''}{secs}s</div>
-              <div className="text-[8px] font-black uppercase tracking-[0.25em] text-zinc-500">Time</div>
+            <div className="rounded-xl p-3 text-center"
+              style={{
+                background: 'rgba(0,0,0,0.35)',
+                border: '1px solid rgba(255,215,0,0.1)',
+              }}
+            >
+              <div className="text-base font-black text-white">{mins > 0 ? `${mins}m ` : ''}{secs}s</div>
+              <div className="text-[8px] font-bold text-purple-400 uppercase tracking-wider">Time</div>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-[#171717]/95 p-3 text-center shadow-lg">
-              <div className="text-sm font-black text-white">{stars}/3</div>
-              <div className="text-[8px] font-black uppercase tracking-[0.25em] text-zinc-500">Stars</div>
+            <div className="rounded-xl p-3 text-center"
+              style={{
+                background: 'rgba(0,0,0,0.35)',
+                border: '1px solid rgba(255,215,0,0.1)',
+              }}
+            >
+              <div className="text-base font-black text-amber-400">{stars}/3</div>
+              <div className="text-[8px] font-bold text-purple-400 uppercase tracking-wider">Stars</div>
             </div>
           </div>
 
-          {/* Badges */}
+          {/* Achievement Badges */}
           <div className="flex flex-wrap items-center justify-center gap-2">
             {isNewBest && (
-              <div className="rounded-xl border border-green-400/20 bg-green-500/10 px-3 py-1">
+              <div className="rounded-xl px-3 py-1.5"
+                style={{ background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.2)' }}
+              >
                 <span className="text-[10px] font-black text-green-400">🏆 New Best!</span>
               </div>
             )}
             {ticketEarned && (
-              <div className="rounded-xl border border-purple-400/20 bg-purple-500/10 px-3 py-1 animate-pulse">
+              <div className="rounded-xl px-3 py-1.5 animate-pulse"
+                style={{ background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.25)' }}
+              >
                 <span className="text-[10px] font-black text-purple-400">🎫 Ticket Earned!</span>
               </div>
             )}
             {isPerfect && (
-              <div className="rounded-xl border border-yellow-400/20 bg-yellow-500/10 px-3 py-1">
-                <span className="text-[10px] font-black text-yellow-400">✨ All Collected!</span>
+              <div className="rounded-xl px-3 py-1.5"
+                style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(255,215,0,0.2)' }}
+              >
+                <span className="text-[10px] font-black text-amber-400">✨ All Collected!</span>
               </div>
             )}
           </div>
+
+          {ticketEarned && (
+            <div className="flex items-center justify-center gap-2">
+              <img src={chestOpen} alt="" className="h-8 w-8" style={{ filter: 'drop-shadow(0 2px 6px rgba(168,85,247,0.3))' }} />
+              <span className="text-xs font-bold text-purple-300">Check Mystery Box!</span>
+            </div>
+          )}
         </div>
 
         {/* Buttons */}
-        <div className={`w-full mt-auto pt-4 pb-2 space-y-2 shrink-0 transition-opacity duration-500 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
+        <div className={`w-full mt-auto pt-4 pb-2 space-y-2 flex-shrink-0 transition-all duration-600 ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
           {hasNextLevel && (
             <button onClick={onNextLevel}
-              className="w-full rounded-2xl bg-yellow-500 py-3 text-sm font-black uppercase tracking-[0.22em] text-black transition hover:bg-yellow-400 active:scale-[0.97]"
-              style={{ boxShadow: '0 6px 20px rgba(234,179,8,0.25)' }}
+              className="w-full py-3.5 rounded-2xl text-sm font-black uppercase tracking-widest text-black transition active:scale-[0.97] relative overflow-hidden"
+              style={{
+                background: 'linear-gradient(180deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%)',
+                border: '2px solid rgba(255,255,255,0.2)',
+                boxShadow: '0 4px 20px rgba(245,158,11,0.4), inset 0 2px 0 rgba(255,255,255,0.3)',
+              }}
             >
               ▶ Next Level
             </button>
           )}
           <div className="flex gap-2">
             <button onClick={onRetry}
-              className="flex-1 rounded-2xl border border-white/10 bg-[#171717]/95 py-2.5 text-xs font-black uppercase tracking-[0.2em] text-zinc-300 transition hover:bg-white/10 active:scale-[0.97]"
-            >
-              🔄 Retry
-            </button>
+              className="flex-1 py-3 rounded-2xl text-xs font-black uppercase tracking-wider text-purple-200 transition active:scale-[0.97]"
+              style={{
+                background: 'rgba(0,0,0,0.4)',
+                border: '1px solid rgba(255,215,0,0.12)',
+              }}
+            >🔄 Retry</button>
             <button onClick={onMenu}
-              className="flex-1 rounded-2xl border border-white/10 bg-[#171717]/95 py-2.5 text-xs font-black uppercase tracking-[0.2em] text-zinc-300 transition hover:bg-white/10 active:scale-[0.97]"
-            >
-              🏠 Menu
-            </button>
+              className="flex-1 py-3 rounded-2xl text-xs font-black uppercase tracking-wider text-purple-200 transition active:scale-[0.97]"
+              style={{
+                background: 'rgba(0,0,0,0.4)',
+                border: '1px solid rgba(255,215,0,0.12)',
+              }}
+            >🏠 Menu</button>
           </div>
         </div>
       </div>
-
-      <style>{`
-        @keyframes float-up {
-          0%, 100% { transform: translateY(0) scale(1); opacity: 0.04; }
-          50% { transform: translateY(-${window.innerHeight}px) scale(0.5); opacity: 0; }
-        }
-      `}</style>
     </div>
   );
 };

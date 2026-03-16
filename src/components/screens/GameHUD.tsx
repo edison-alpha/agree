@@ -13,6 +13,7 @@ import shieldPickup from '../../assets/underwater/Bonus/Shield.webp';
 import accelerationPickup from '../../assets/underwater/Bonus/Acceleration.webp';
 import heartPickup from '../../assets/underwater/Bonus/Heart.webp';
 import chestClosed from '../../assets/underwater/Neutral/\u00e6hest_closed.webp';
+import dimsumImg from '../../assets/dimsum.png';
 
 interface GameHUDProps {
   score: number;
@@ -85,7 +86,7 @@ export const GameHUD: React.FC<GameHUDProps> = ({
         paddingTop: 'max(12px, env(safe-area-inset-top, 12px))',
         paddingLeft: 'max(12px, env(safe-area-inset-left, 12px))',
         paddingRight: 'max(12px, env(safe-area-inset-right, 12px))',
-        background: 'linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.45) 60%, transparent 100%)',
+        background: 'linear-gradient(to bottom, rgba(15,5,35,0.85) 0%, rgba(26,10,62,0.55) 60%, transparent 100%)',
       }}
     >
       {/* ── Top row: Score + Mystery indicator + Lives ── */}
@@ -94,9 +95,9 @@ export const GameHUD: React.FC<GameHUDProps> = ({
         <div
           className="flex items-center gap-1.5 rounded-xl px-3 py-1.5"
           style={{
-            background: 'linear-gradient(135deg, rgba(251,191,36,0.2) 0%, rgba(245,158,11,0.15) 100%)',
-            border: '1px solid rgba(251,191,36,0.25)',
-            boxShadow: '0 2px 12px rgba(251,191,36,0.15)',
+            background: 'linear-gradient(135deg, rgba(45,27,105,0.7) 0%, rgba(26,13,64,0.6) 100%)',
+            border: '1px solid rgba(255,215,0,0.2)',
+            boxShadow: '0 2px 12px rgba(168,85,247,0.15)',
             backdropFilter: 'blur(8px)',
           }}
         >
@@ -121,18 +122,18 @@ export const GameHUD: React.FC<GameHUDProps> = ({
         <div
           className="flex items-center gap-1.5 rounded-xl px-3 py-1.5"
           style={{
-            background: 'linear-gradient(135deg, rgba(251,191,36,0.15) 0%, rgba(245,158,11,0.08) 100%)',
-            border: '1px solid rgba(251,191,36,0.2)',
-            boxShadow: '0 2px 8px rgba(251,191,36,0.1)',
+            background: 'linear-gradient(135deg, rgba(45,27,105,0.7) 0%, rgba(26,13,64,0.6) 100%)',
+            border: '1px solid rgba(255,215,0,0.2)',
+            boxShadow: '0 2px 8px rgba(168,85,247,0.15)',
             backdropFilter: 'blur(8px)',
           }}
         >
-          <span className="text-base">🥟</span>
-          <span className="text-sm font-black tabular-nums text-yellow-400">
+          <img src={dimsumImg} alt="dimsum" className="h-5 w-5" style={{ filter: 'drop-shadow(0 1px 3px rgba(255,215,0,0.4))' }} />
+          <span className="text-sm font-black tabular-nums text-amber-400">
             {dimsumCollected}/{dimsumTotal}
           </span>
           {levelName && (
-            <span className="text-[8px] font-bold text-yellow-500/50 uppercase tracking-wider ml-1">
+            <span className="text-[8px] font-bold text-purple-300/50 uppercase tracking-wider ml-1">
               {levelName}
             </span>
           )}
@@ -171,9 +172,9 @@ export const GameHUD: React.FC<GameHUDProps> = ({
       <div
         className="flex items-center gap-2.5 rounded-xl p-2"
         style={{
-          background: 'linear-gradient(135deg, rgba(0,0,0,0.5) 0%, rgba(15,15,35,0.45) 100%)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          boxShadow: '0 4px 15px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)',
+          background: 'linear-gradient(135deg, rgba(26,10,62,0.7) 0%, rgba(45,27,105,0.5) 100%)',
+          border: '1px solid rgba(255,215,0,0.1)',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,215,0,0.05)',
           backdropFilter: 'blur(10px)',
         }}
       >
