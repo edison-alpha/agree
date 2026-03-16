@@ -753,6 +753,7 @@ export function createInitialGameSnapshot(): GameSnapshot {
     currentLevelId: 1,
     levelStartTime: 0,
     lastDimsumSpawn: 0,
+    paused: false,
   };
 }
 
@@ -795,4 +796,5 @@ export function resetGameSnapshot(g: GameSnapshot): void {
   g.currentLevelId = 1;
   g.levelStartTime = 0;
   g.lastDimsumSpawn = 0;
+  g.paused = false;
 }

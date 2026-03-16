@@ -273,4 +273,6 @@ export interface GameSnapshot {
   levelStartTime: number;
   /** Last dimsum spawn time */
   lastDimsumSpawn: number;
+  /** Game is paused (overlay shown but world still renders) */
+  paused: boolean;
 }

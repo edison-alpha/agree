@@ -39,7 +39,7 @@ export function useGameLoop(
       const vw = window.innerWidth;
       const vh = window.innerHeight;
 
-      if (state.state === 'playing') {
+      if (state.state === 'playing' && !state.paused) {
         updatePhysics(state, time, dt, vw, vh, eventsRef.current);
       }
 

@@ -28,6 +28,7 @@ interface GameHUDProps {
   dimsumCollected: number;
   dimsumTotal: number;
   levelName?: string;
+  onPause?: () => void;
 }
 
 interface WeaponConfig {
@@ -75,6 +76,7 @@ export const GameHUD: React.FC<GameHUDProps> = ({
   dimsumCollected,
   dimsumTotal,
   levelName,
+  onPause,
 }) => {
   const weaponConfig = useMemo(() => WEAPON_CONFIGS[weapon] || WEAPON_CONFIGS.default, [weapon]);
   const formattedScore = useMemo(() => score.toLocaleString(), [score]);
@@ -140,30 +142,49 @@ export const GameHUD: React.FC<GameHUDProps> = ({
         </div>
 
         {/* Lives (hearts with sprite) */}
-        <div
-          className="flex items-center gap-0.5 rounded-xl px-2.5 py-1.5"
-          style={{
-            background: 'linear-gradient(135deg, rgba(239,68,68,0.12) 0%, rgba(220,38,38,0.08) 100%)',
-            border: '1px solid rgba(239,68,68,0.2)',
-            backdropFilter: 'blur(8px)',
-          }}
-        >
-          {Array.from({ length: Math.max(lives, 0) }).map((_, i) => (
-            <img
-              key={i}
-              src={heartPickup}
-              alt="life"
-              className="h-5 w-5"
+        <div className="flex items-center gap-1.5">
+          <div
+            className="flex items-center gap-0.5 rounded-xl px-2.5 py-1.5"
+            style={{
+              background: 'linear-gradient(135deg, rgba(239,68,68,0.12) 0%, rgba(220,38,38,0.08) 100%)',
+              border: '1px solid rgba(239,68,68,0.2)',
+              backdropFilter: 'blur(8px)',
+            }}
+          >
+            {Array.from({ length: Math.max(lives, 0) }).map((_, i) => (
+              <img
+                key={i}
+                src={heartPickup}
+                alt="life"
+                className="h-5 w-5"
+                style={{
+                  filter: 'drop-shadow(0 1px 3px rgba(239,68,68,0.5))',
+                  animation: lives <= 1 ? 'pulse 1s ease-in-out infinite' : undefined,
+                }}
+              />
+            ))}
+            {lives <= 0 && (
+              <span className="text-[10px] font-bold text-red-400" style={{ textShadow: '0 0 8px rgba(239,68,68,0.5)' }}>
+                NO LIVES!
+              </span>
+            )}
+          </div>
+
+          {/* Pause/Settings button */}
+          {onPause && (
+            <button
+              onClick={onPause}
+              className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-xl transition-transform active:scale-90"
               style={{
-                filter: 'drop-shadow(0 1px 3px rgba(239,68,68,0.5))',
-                animation: lives <= 1 ? 'pulse 1s ease-in-out infinite' : undefined,
+                background: 'linear-gradient(135deg, rgba(45,27,105,0.8) 0%, rgba(26,13,64,0.7) 100%)',
+                border: '1px solid rgba(255,215,0,0.25)',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                backdropFilter: 'blur(8px)',
               }}
-            />
-          ))}
-          {lives <= 0 && (
-            <span className="text-[10px] font-bold text-red-400" style={{ textShadow: '0 0 8px rgba(239,68,68,0.5)' }}>
-              NO LIVES!
-            </span>
+              title="Settings"
+            >
+              <span className="text-base" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))' }}>⚙️</span>
+            </button>
           )}
         </div>
       </div>

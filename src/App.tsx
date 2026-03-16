@@ -50,9 +50,11 @@ import { MysteryBoxScreen } from './components/screens/MysteryBoxScreen';
 import { LevelCompleteScreen } from './components/screens/LevelCompleteScreen';
 import { SettingsScreen } from './components/screens/SettingsScreen';
 import { SpinWheelScreen } from './components/screens/SpinWheelScreen';
+import { GamePauseMenu } from './components/screens/GamePauseMenu';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 import { playSoundEffect } from './utils/audio';
+import { playClickSound } from './utils/uiAudio';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // App — thin orchestrator; all heavy lifting lives in hooks / engine
@@ -68,6 +70,18 @@ export default function App() {
     };
     document.addEventListener('pointerdown', requestFullscreen, { once: true });
     return () => document.removeEventListener('pointerdown', requestFullscreen);
+  }, []);
+
+  // ── Global click sound for all buttons/links ───────────────────────
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('button') || target.closest('a') || target.closest('[role="button"]')) {
+        playClickSound();
+      }
+    };
+    document.addEventListener('pointerdown', handler, true);
+    return () => document.removeEventListener('pointerdown', handler, true);
   }, []);
 
   // ── Persistent Store ──────────────────────────────────────────────
@@ -96,6 +110,9 @@ export default function App() {
   const [levelStartTime, setLevelStartTime] = useState(0);
   const [levelTimeElapsed, setLevelTimeElapsed] = useState(0);
   const [previousTickets, setPreviousTickets] = useState(0);
+  const [gamePaused, setGamePaused] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [musicEnabled, setMusicEnabled] = useState(true);
 
   // ── Refs ─────────────────────────────────────────────────────────────
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -676,6 +693,47 @@ export default function App() {
           dimsumCollected={dimsumCollected}
           dimsumTotal={dimsumTotal}
           levelName={currentLevel?.name}
+          onPause={() => {
+            setGamePaused(true);
+            gameRef.current.paused = true;
+          }}
+        />
+      )}
+
+      {/* ── Pause Menu Overlay ───────────────────────────────────────── */}
+      {gamePaused && gameState === 'playing' && (
+        <GamePauseMenu
+          currentCharacterId={selectedCharacterId}
+          soundEnabled={soundEnabled}
+          musicEnabled={musicEnabled}
+          onResume={() => {
+            setGamePaused(false);
+            gameRef.current.paused = false;
+          }}
+          onToggleSound={(enabled) => setSoundEnabled(enabled)}
+          onToggleMusic={(enabled) => {
+            setMusicEnabled(enabled);
+            if (!enabled) {
+              audio.stopBackgroundMusic();
+            } else {
+              audio.startBackgroundMusic();
+            }
+          }}
+          onChangeCharacter={(charId) => {
+            setSelectedCharacterId(charId as CharacterId);
+            if (storeData.profile) {
+              const updatedProfile = { ...storeData.profile, characterId: charId };
+              const updatedData = saveProfile(storeData, updatedProfile);
+              setStoreData(updatedData);
+            }
+          }}
+          onExitToMenu={() => {
+            setGamePaused(false);
+            gameRef.current.paused = false;
+            setGameState('mainMenu');
+            gameRef.current.state = 'mainMenu';
+            audio.stopBackgroundMusic();
+          }}
         />
       )}
 
