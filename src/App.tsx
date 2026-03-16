@@ -7,9 +7,23 @@ import type { ActivePowerUp, CharacterId, DialogueMessage, GameState } from './t
 import { GAME_CONFIG } from './constants/config';
 import { CHARACTER_OPTIONS } from './constants/characters';
 import { buildOpeningDialogues, buildMilestoneDialogues } from './constants/dialogues';
+import { LEVELS, getLevelById } from './constants/levels';
+import type { LevelConfig } from './constants/levels';
 
 // ─── Engine / Entities ──────────────────────────────────────────────────────
 import { createInitialGameSnapshot, resetGameSnapshot } from './engine/entities';
+
+// ─── Store ──────────────────────────────────────────────────────────────────
+import {
+  loadGameData,
+  saveProfile,
+  saveLevelProgress,
+  addToLeaderboard,
+  getTotalStars,
+  getCompletedLevels,
+  getTicketProgress,
+} from './store/gameStore';
+import type { GameStoreData } from './store/gameStore';
 
 // ─── Custom Hooks ───────────────────────────────────────────────────────────
 import { useCamera } from './hooks/useCamera';
@@ -28,6 +42,13 @@ import { GameHUD } from './components/screens/GameHUD';
 import { WishScreen } from './components/screens/WishScreen';
 import { GameOverScreen } from './components/screens/GameOverScreen';
 import { BirthdayScreen } from './components/screens/BirthdayScreen';
+import { MainMenuScreen } from './components/screens/MainMenuScreen';
+import { LevelSelectScreen } from './components/screens/LevelSelectScreen';
+import { LeaderboardScreen } from './components/screens/LeaderboardScreen';
+import { InventoryScreen } from './components/screens/InventoryScreen';
+import { MysteryBoxScreen } from './components/screens/MysteryBoxScreen';
+import { LevelCompleteScreen } from './components/screens/LevelCompleteScreen';
+import { SettingsScreen } from './components/screens/SettingsScreen';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 import { playSoundEffect } from './utils/audio';
@@ -42,12 +63,14 @@ export default function App() {
       const el = document.documentElement;
       if (document.fullscreenElement) return;
       el.requestFullscreen?.().catch(() => {});
-      // Remove after first interaction
       document.removeEventListener('pointerdown', requestFullscreen);
     };
     document.addEventListener('pointerdown', requestFullscreen, { once: true });
     return () => document.removeEventListener('pointerdown', requestFullscreen);
   }, []);
+
+  // ── Persistent Store ──────────────────────────────────────────────
+  const [storeData, setStoreData] = useState<GameStoreData>(() => loadGameData());
 
   // ── State machine ────────────────────────────────────────────────────
   const [gameState, setGameState] = useState<GameState>('intro');
@@ -65,6 +88,14 @@ export default function App() {
   const [milestoneDialogues, setMilestoneDialogues] = useState<DialogueMessage[]>([]);
   const [selectedCharacterId, setSelectedCharacterId] = useState<CharacterId>('agree');
 
+  // ── Level / Dimsum State ──────────────────────────────────────────
+  const [currentLevelId, setCurrentLevelId] = useState(1);
+  const [dimsumCollected, setDimsumCollected] = useState(0);
+  const [dimsumTotal, setDimsumTotal] = useState(0);
+  const [levelStartTime, setLevelStartTime] = useState(0);
+  const [levelTimeElapsed, setLevelTimeElapsed] = useState(0);
+  const [previousTickets, setPreviousTickets] = useState(0);
+
   // ── Refs ─────────────────────────────────────────────────────────────
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameRef = useRef(createInitialGameSnapshot());
@@ -72,14 +103,25 @@ export default function App() {
   // ── Derived ──────────────────────────────────────────────────────────
   const dialogueMessages = useMemo(() => buildOpeningDialogues(playerName.trim()), [playerName]);
   const selectedCharacter = CHARACTER_OPTIONS.find((c) => c.id === selectedCharacterId) ?? CHARACTER_OPTIONS[0];
+  const currentLevel = useMemo(() => getLevelById(currentLevelId), [currentLevelId]);
 
   // ── Hooks ────────────────────────────────────────────────────────────
   const camera = useCamera(gameState);
   const audio = useAudioManager(gameRef);
 
   const { loadingProgress, introFading } = useIntroLoader(gameState, gameRef, () => {
-    setGameState('nameEntry');
-    gameRef.current.state = 'nameEntry';
+    // Check if we have a saved profile
+    const data = loadGameData();
+    if (data.profile) {
+      setPlayerName(data.profile.name);
+      setSelectedCharacterId(data.profile.characterId as CharacterId);
+      setStoreData(data);
+      setGameState('mainMenu');
+      gameRef.current.state = 'mainMenu';
+    } else {
+      setGameState('nameEntry');
+      gameRef.current.state = 'nameEntry';
+    }
   });
 
   // ── Sync game-ref state on every React state change ──────────────────
@@ -97,6 +139,17 @@ export default function App() {
     }
   }, [gameState]);
 
+  // ── Sync dimsum from gameRef to React state ──────────────────────────
+  useEffect(() => {
+    if (gameState !== 'playing') return;
+    const interval = setInterval(() => {
+      setDimsumCollected(gameRef.current.dimsumCollected);
+      setWeapon(gameRef.current.weapon);
+      setPowerUps([...gameRef.current.powerUps]);
+    }, 200);
+    return () => clearInterval(interval);
+  }, [gameState]);
+
   // ── Physics event handlers (stable refs via useCallback) ────────────
   const onScoreChange = useCallback((s: number) => setScore(s), []);
   const onHealthChange = useCallback((h: number) => setHealth(h), []);
@@ -109,20 +162,78 @@ export default function App() {
 
   const onMilestone = useCallback(
     (milestone: number) => {
+      // Check if all dimsum collected → level complete
+      if (gameRef.current.dimsumCollected >= gameRef.current.dimsumTotal) {
+        const timeElapsed = (performance.now() - levelStartTime) / 1000;
+        setLevelTimeElapsed(timeElapsed);
+        setDimsumCollected(gameRef.current.dimsumCollected);
+
+        // Save progress
+        const ticketsBefore = storeData.tickets;
+        setPreviousTickets(ticketsBefore);
+        const updated = saveLevelProgress(
+          storeData,
+          currentLevelId,
+          gameRef.current.dimsumCollected,
+          gameRef.current.dimsumTotal,
+          timeElapsed,
+        );
+
+        // Add to leaderboard
+        const finalData = addToLeaderboard(updated, {
+          playerName: playerName.trim(),
+          profilePhoto: camera.profilePhoto,
+          totalDimsum: updated.totalDimsum,
+          levelsCompleted: getCompletedLevels(updated),
+          totalStars: getTotalStars(updated),
+        });
+
+        setStoreData(finalData);
+        setGameState('levelComplete');
+        audio.stopBackgroundMusic();
+        playSoundEffect(gameRef.current.audio['victory_music']);
+        return;
+      }
+
+      // Otherwise, standard milestone behavior
       setCurrentWishMilestone(milestone);
       setMilestoneDialogues(buildMilestoneDialogues(playerName.trim(), milestone));
       setMilestoneDialogueIndex(0);
       setGameState('milestoneDialogue');
       audio.stopBackgroundMusic();
     },
-    [playerName, audio],
+    [playerName, audio, levelStartTime, storeData, currentLevelId, camera.profilePhoto],
   );
 
   const onBirthday = useCallback(() => {
-    setGameState('birthday');
+    // Level complete is now the primary endpoint
+    const timeElapsed = (performance.now() - levelStartTime) / 1000;
+    setLevelTimeElapsed(timeElapsed);
+    setDimsumCollected(gameRef.current.dimsumCollected);
+
+    const ticketsBefore = storeData.tickets;
+    setPreviousTickets(ticketsBefore);
+    const updated = saveLevelProgress(
+      storeData,
+      currentLevelId,
+      gameRef.current.dimsumCollected,
+      gameRef.current.dimsumTotal,
+      timeElapsed,
+    );
+
+    const finalData = addToLeaderboard(updated, {
+      playerName: playerName.trim(),
+      profilePhoto: camera.profilePhoto,
+      totalDimsum: updated.totalDimsum,
+      levelsCompleted: getCompletedLevels(updated),
+      totalStars: getTotalStars(updated),
+    });
+
+    setStoreData(finalData);
+    setGameState('levelComplete');
     audio.stopBackgroundMusic();
     playSoundEffect(gameRef.current.audio['victory_music']);
-  }, [audio]);
+  }, [audio, levelStartTime, storeData, currentLevelId, playerName, camera.profilePhoto]);
 
   // ── Game loop ────────────────────────────────────────────────────────
   useGameLoop(canvasRef, gameRef, {
@@ -133,16 +244,6 @@ export default function App() {
     onMilestone,
     onBirthday,
   });
-
-  // ── Sync weapon/powerUps from gameRef to React state for HUD ──────
-  useEffect(() => {
-    if (gameState !== 'playing') return;
-    const interval = setInterval(() => {
-      setWeapon(gameRef.current.weapon);
-      setPowerUps([...gameRef.current.powerUps]);
-    }, 200);
-    return () => clearInterval(interval);
-  }, [gameState]);
 
   // ── Transition helpers ───────────────────────────────────────────────
   const continueFromName = () => {
@@ -156,29 +257,70 @@ export default function App() {
   const startGame = () => {
     if (!playerName.trim()) return;
     if (!camera.profilePhoto) {
-      camera.setCameraError('Ambil foto dulu sebelum lanjut ke percakapan.');
+      camera.setCameraError('Take a photo before continuing.');
       return;
     }
     setGameState('characterSelect');
     gameRef.current.state = 'characterSelect';
   };
 
-  const beginGameplay = () => {
-    const trimmed = playerName.trim();
-    if (!trimmed) return;
-    if (trimmed !== playerName) setPlayerName(trimmed);
-    // Player starts at map centre
-    gameRef.current.player.x = GAME_CONFIG.mapWidth / 2;
-    gameRef.current.player.y = GAME_CONFIG.mapHeight / 2;
-    // Set the player sprite to the SELECTED character's front-facing version
-    // caractertentara.png for 'agree', caracterdaster.png for 'agreedaster'
+  const goToMainMenu = () => {
+    // Save profile
+    const updated = saveProfile(storeData, {
+      name: playerName.trim(),
+      profilePhoto: camera.profilePhoto,
+      characterId: selectedCharacterId,
+      createdAt: Date.now(),
+    });
+    setStoreData(updated);
+    setGameState('mainMenu');
+    gameRef.current.state = 'mainMenu';
+  };
+
+  const startLevel = (levelId: number) => {
+    const level = getLevelById(levelId);
+    if (!level) return;
+
+    setCurrentLevelId(levelId);
+    setDimsumCollected(0);
+    setDimsumTotal(level.dimsumCount);
+    setScore(0);
+    setHealth(GAME_CONFIG.playerMaxHealth);
+    setLives(GAME_CONFIG.playerLives);
+    setWeapon('default');
+    setPowerUps([]);
+    setCurrentWishMilestone(0);
+    setWishes([]);
+
+    // Configure game snapshot for this level
+    resetGameSnapshot(gameRef.current);
+    gameRef.current.dimsumCollected = 0;
+    gameRef.current.dimsumTotal = level.dimsumCount;
+    gameRef.current.currentLevelId = levelId;
+
+    // Set player at map centre
+    gameRef.current.player.x = level.mapWidth / 2;
+    gameRef.current.player.y = level.mapHeight / 2;
+
+    // Set character sprite
     const charFrontKey = `char_${selectedCharacterId}_front`;
     if (gameRef.current.images[charFrontKey]) {
       gameRef.current.images.trooper_character = gameRef.current.images[charFrontKey];
     }
+
+    setLevelStartTime(performance.now());
+    gameRef.current.levelStartTime = performance.now();
+
     setGameState('playing');
     gameRef.current.state = 'playing';
     audio.startBackgroundMusic();
+  };
+
+  const beginGameplay = () => {
+    const trimmed = playerName.trim();
+    if (!trimmed) return;
+    if (trimmed !== playerName) setPlayerName(trimmed);
+    startLevel(currentLevelId);
   };
 
   const nextDialogue = () => {
@@ -200,13 +342,31 @@ export default function App() {
 
   const submitWish = () => {
     const trimmed = wishInput.trim();
-    // MANDATORY: must write a wish (min 3 chars) before continuing
     if (trimmed.length < 3) return;
     setWishes((prev) => [...prev, trimmed]);
     setWishInput('');
     setGameState('playing');
     gameRef.current.state = 'playing';
     audio.startBackgroundMusic();
+  };
+
+  const handleLevelComplete_NextLevel = () => {
+    const nextId = currentLevelId + 1;
+    if (nextId <= LEVELS.length) {
+      startLevel(nextId);
+    } else {
+      setGameState('mainMenu');
+    }
+  };
+
+  const handleLevelComplete_Retry = () => {
+    startLevel(currentLevelId);
+  };
+
+  const handleLevelComplete_Menu = () => {
+    setGameState('mainMenu');
+    gameRef.current.state = 'mainMenu';
+    audio.stopBackgroundMusic();
   };
 
   const restartGame = () => {
@@ -222,10 +382,29 @@ export default function App() {
     setDialogueIndex(0);
     setMilestoneDialogueIndex(0);
     setMilestoneDialogues([]);
+    setDimsumCollected(0);
+    setDimsumTotal(0);
+
+    if (storeData.profile) {
+      setGameState('mainMenu');
+    } else {
+      setSelectedCharacterId('agree');
+      setGameState('nameEntry');
+      camera.setProfilePhoto(null);
+      camera.setCameraError('');
+    }
+
+    audio.stopBackgroundMusic();
+    audio.stopVictoryMusic();
+  };
+
+  const fullRestart = () => {
     setSelectedCharacterId('agree');
-    setGameState('nameEntry');
+    setPlayerName('');
     camera.setProfilePhoto(null);
     camera.setCameraError('');
+    setGameState('nameEntry');
+    gameRef.current.state = 'nameEntry';
     audio.stopBackgroundMusic();
     audio.stopVictoryMusic();
   };
@@ -271,8 +450,13 @@ export default function App() {
           selectedId={selectedCharacterId}
           onSelect={setSelectedCharacterId}
           onContinue={() => {
-            setGameState('tutorial');
-            gameRef.current.state = 'tutorial';
+            // First time → tutorial, returning → main menu
+            if (!storeData.profile) {
+              setGameState('tutorial');
+              gameRef.current.state = 'tutorial';
+            } else {
+              goToMainMenu();
+            }
           }}
         />
       )}
@@ -281,10 +465,114 @@ export default function App() {
       {gameState === 'tutorial' && (
         <TutorialScreen
           onContinue={() => {
-            setDialogueIndex(0);
-            setGameState('dialogue');
-            gameRef.current.state = 'dialogue';
+            goToMainMenu();
           }}
+        />
+      )}
+
+      {/* ── Main Menu (Hub) ──────────────────────────────────────────── */}
+      {gameState === 'mainMenu' && (
+        <MainMenuScreen
+          storeData={storeData}
+          playerName={playerName}
+          profilePhoto={camera.profilePhoto}
+          onPlay={() => {
+            setGameState('levelSelect');
+            gameRef.current.state = 'levelSelect';
+          }}
+          onLeaderboard={() => {
+            setGameState('leaderboard');
+            gameRef.current.state = 'leaderboard';
+          }}
+          onInventory={() => {
+            setGameState('inventory');
+            gameRef.current.state = 'inventory';
+          }}
+          onMysteryBox={() => {
+            setGameState('mysteryBox');
+            gameRef.current.state = 'mysteryBox';
+          }}
+          onSettings={() => {
+            setGameState('settings');
+            gameRef.current.state = 'settings';
+          }}
+        />
+      )}
+
+      {/* ── Level Select ─────────────────────────────────────────────── */}
+      {gameState === 'levelSelect' && (
+        <LevelSelectScreen
+          storeData={storeData}
+          onSelectLevel={(levelId) => {
+            setCurrentLevelId(levelId);
+            setDialogueIndex(0);
+            // Quick start: skip dialogue for replayed levels
+            const hasPlayed = storeData.levels[levelId]?.completed;
+            if (hasPlayed) {
+              startLevel(levelId);
+            } else {
+              setGameState('dialogue');
+              gameRef.current.state = 'dialogue';
+            }
+          }}
+          onBack={() => {
+            setGameState('mainMenu');
+            gameRef.current.state = 'mainMenu';
+          }}
+        />
+      )}
+
+      {/* ── Leaderboard ──────────────────────────────────────────────── */}
+      {gameState === 'leaderboard' && (
+        <LeaderboardScreen
+          storeData={storeData}
+          currentPlayerName={playerName}
+          onBack={() => {
+            setGameState('mainMenu');
+            gameRef.current.state = 'mainMenu';
+          }}
+        />
+      )}
+
+      {/* ── Inventory ────────────────────────────────────────────────── */}
+      {gameState === 'inventory' && (
+        <InventoryScreen
+          storeData={storeData}
+          playerName={playerName}
+          profilePhoto={camera.profilePhoto}
+          onBack={() => {
+            setGameState('mainMenu');
+            gameRef.current.state = 'mainMenu';
+          }}
+          onMysteryBox={() => {
+            setGameState('mysteryBox');
+            gameRef.current.state = 'mysteryBox';
+          }}
+        />
+      )}
+
+      {/* ── Mystery Box ──────────────────────────────────────────────── */}
+      {gameState === 'mysteryBox' && (
+        <MysteryBoxScreen
+          storeData={storeData}
+          onDataChange={setStoreData}
+          onBack={() => {
+            setGameState('mainMenu');
+            gameRef.current.state = 'mainMenu';
+          }}
+        />
+      )}
+
+      {/* ── Settings ─────────────────────────────────────────────────── */}
+      {gameState === 'settings' && (
+        <SettingsScreen
+          storeData={storeData}
+          onDataChange={setStoreData}
+          onBack={() => {
+            setGameState('mainMenu');
+            gameRef.current.state = 'mainMenu';
+          }}
+          onResetComplete={fullRestart}
         />
       )}
 
@@ -298,7 +586,7 @@ export default function App() {
           characterImage={selectedCharacter.image}
           characterName={selectedCharacter.name}
           onNext={nextDialogue}
-          finalLabel="Mulai"
+          finalLabel="Start Level"
           zIndex={70}
         />
       )}
@@ -313,7 +601,7 @@ export default function App() {
           characterImage={selectedCharacter.image}
           characterName={selectedCharacter.name}
           onNext={nextMilestoneDialogue}
-          finalLabel="Lanjut Wish"
+          finalLabel="Continue"
           zIndex={72}
         />
       )}
@@ -330,6 +618,9 @@ export default function App() {
           profilePhoto={camera.profilePhoto}
           characterImage={selectedCharacter.image}
           characterName={selectedCharacter.name}
+          dimsumCollected={dimsumCollected}
+          dimsumTotal={dimsumTotal}
+          levelName={currentLevel?.name}
         />
       )}
 
@@ -345,10 +636,33 @@ export default function App() {
 
       {/* ── Game Over ────────────────────────────────────────────────── */}
       {gameState === 'gameover' && (
-        <GameOverScreen score={score} onRestart={restartGame} />
+        <GameOverScreen
+          score={score}
+          onRestart={() => {
+            // Go back to level select instead of full restart
+            setGameState('levelSelect');
+            gameRef.current.state = 'levelSelect';
+            audio.stopBackgroundMusic();
+          }}
+        />
       )}
 
-      {/* ── Birthday / Victory ───────────────────────────────────────── */}
+      {/* ── Level Complete ────────────────────────────────────────────── */}
+      {gameState === 'levelComplete' && currentLevel && (
+        <LevelCompleteScreen
+          levelConfig={currentLevel}
+          dimsumCollected={dimsumCollected}
+          timeTaken={Math.floor(levelTimeElapsed)}
+          previousBest={storeData.levels[currentLevelId]?.dimsumCollected ?? 0}
+          ticketEarned={storeData.tickets > previousTickets}
+          onNextLevel={handleLevelComplete_NextLevel}
+          onRetry={handleLevelComplete_Retry}
+          onMenu={handleLevelComplete_Menu}
+          hasNextLevel={currentLevelId < LEVELS.length}
+        />
+      )}
+
+      {/* ── Birthday / Victory (legacy, kept for compatibility) ───────── */}
       {gameState === 'birthday' && (
         <BirthdayScreen playerName={playerName} wishes={wishes} onRestart={restartGame} />
       )}

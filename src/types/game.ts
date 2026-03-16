@@ -10,7 +10,14 @@ export type GameState =
   | 'playing'
   | 'wish'
   | 'gameover'
-  | 'birthday';
+  | 'birthday'
+  | 'mainMenu'
+  | 'levelSelect'
+  | 'leaderboard'
+  | 'inventory'
+  | 'mysteryBox'
+  | 'settings'
+  | 'levelComplete';
 
 // ─── Dialogue ───────────────────────────────────────────────────────────────
 export type DialogueSpeaker = 'Goblin Bay' | 'Player';
@@ -138,7 +145,8 @@ export type PickupType =
   | 'speed_boost'
   | 'coin'
   | 'mystery_box'
-  | 'energy_pack';
+  | 'energy_pack'
+  | 'dimsum';
 
 export interface Pickup {
   x: number;
@@ -254,4 +262,14 @@ export interface GameSnapshot {
   lastObstacleSpawn: number;
   /** Total score animation bubbles tracker */
   lastScoreBubble: number;
+  /** Dimsum collected in current level */
+  dimsumCollected: number;
+  /** Total dimsum in current level */
+  dimsumTotal: number;
+  /** Current level ID */
+  currentLevelId: number;
+  /** Level start time for timing */
+  levelStartTime: number;
+  /** Last dimsum spawn time */
+  lastDimsumSpawn: number;
 }

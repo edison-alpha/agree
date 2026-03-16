@@ -712,6 +712,11 @@ export function createInitialGameSnapshot(): GameSnapshot {
     shieldActive: false,
     lastObstacleSpawn: 0,
     lastScoreBubble: 0,
+    dimsumCollected: 0,
+    dimsumTotal: 0,
+    currentLevelId: 1,
+    levelStartTime: 0,
+    lastDimsumSpawn: 0,
   };
 }
 
@@ -749,4 +754,9 @@ export function resetGameSnapshot(g: GameSnapshot): void {
   g.shieldActive = false;
   g.lastObstacleSpawn = 0;
   g.lastScoreBubble = 0;
+  g.dimsumCollected = 0;
+  g.dimsumTotal = 0;
+  g.currentLevelId = 1;
+  g.levelStartTime = 0;
+  g.lastDimsumSpawn = 0;
 }

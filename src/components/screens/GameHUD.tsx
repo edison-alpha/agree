@@ -24,6 +24,9 @@ interface GameHUDProps {
   profilePhoto: string | null;
   characterImage: string;
   characterName: string;
+  dimsumCollected: number;
+  dimsumTotal: number;
+  levelName?: string;
 }
 
 interface WeaponConfig {
@@ -68,6 +71,9 @@ export const GameHUD: React.FC<GameHUDProps> = ({
   profilePhoto,
   characterImage,
   characterName,
+  dimsumCollected,
+  dimsumTotal,
+  levelName,
 }) => {
   const weaponConfig = useMemo(() => WEAPON_CONFIGS[weapon] || WEAPON_CONFIGS.default, [weapon]);
   const formattedScore = useMemo(() => score.toLocaleString(), [score]);
@@ -111,21 +117,25 @@ export const GameHUD: React.FC<GameHUDProps> = ({
           </span>
         </div>
 
-        {/* Mystery box hint */}
+        {/* Dimsum Counter */}
         <div
-          className="flex items-center gap-1 rounded-lg px-2 py-1"
+          className="flex items-center gap-1.5 rounded-xl px-3 py-1.5"
           style={{
-            background: 'rgba(0,0,0,0.35)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            backdropFilter: 'blur(6px)',
+            background: 'linear-gradient(135deg, rgba(251,191,36,0.15) 0%, rgba(245,158,11,0.08) 100%)',
+            border: '1px solid rgba(251,191,36,0.2)',
+            boxShadow: '0 2px 8px rgba(251,191,36,0.1)',
+            backdropFilter: 'blur(8px)',
           }}
         >
-          <img
-            src={chestClosed}
-            alt="chest"
-            className="h-4 w-4 opacity-60"
-          />
-          <span className="text-[9px] font-medium text-zinc-400">Find chests!</span>
+          <span className="text-base">🥟</span>
+          <span className="text-sm font-black tabular-nums text-yellow-400">
+            {dimsumCollected}/{dimsumTotal}
+          </span>
+          {levelName && (
+            <span className="text-[8px] font-bold text-yellow-500/50 uppercase tracking-wider ml-1">
+              {levelName}
+            </span>
+          )}
         </div>
 
         {/* Lives (hearts with sprite) */}
