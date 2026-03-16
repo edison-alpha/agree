@@ -526,7 +526,6 @@ export default function App() {
       {gameState === 'leaderboard' && (
         <LeaderboardScreen
           storeData={storeData}
-          currentPlayerName={playerName}
           onBack={() => {
             setGameState('mainMenu');
             gameRef.current.state = 'mainMenu';
@@ -538,15 +537,9 @@ export default function App() {
       {gameState === 'inventory' && (
         <InventoryScreen
           storeData={storeData}
-          playerName={playerName}
-          profilePhoto={camera.profilePhoto}
           onBack={() => {
             setGameState('mainMenu');
             gameRef.current.state = 'mainMenu';
-          }}
-          onMysteryBox={() => {
-            setGameState('mysteryBox');
-            gameRef.current.state = 'mysteryBox';
           }}
         />
       )}
@@ -638,10 +631,12 @@ export default function App() {
       {gameState === 'gameover' && (
         <GameOverScreen
           score={score}
-          onRestart={() => {
-            // Go back to level select instead of full restart
-            setGameState('levelSelect');
-            gameRef.current.state = 'levelSelect';
+          dimsumCollected={dimsumCollected}
+          dimsumTotal={dimsumTotal}
+          onRestart={() => startLevel(currentLevelId)}
+          onMenu={() => {
+            setGameState('mainMenu');
+            gameRef.current.state = 'mainMenu';
             audio.stopBackgroundMusic();
           }}
         />
@@ -653,7 +648,7 @@ export default function App() {
           levelConfig={currentLevel}
           dimsumCollected={dimsumCollected}
           timeTaken={Math.floor(levelTimeElapsed)}
-          previousBest={storeData.levels[currentLevelId]?.dimsumCollected ?? 0}
+          previousBest={storeData.levels[currentLevelId]?.bestTime ?? 0}
           ticketEarned={storeData.tickets > previousTickets}
           onNextLevel={handleLevelComplete_NextLevel}
           onRetry={handleLevelComplete_Retry}

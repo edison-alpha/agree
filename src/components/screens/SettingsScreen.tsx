@@ -1,40 +1,52 @@
 import React, { useState } from 'react';
 import type { GameStoreData } from '../../store/gameStore';
-import { updateSettings, resetAllProgress } from '../../store/gameStore';
+import { updateSettings, resetAllProgress, saveGameData } from '../../store/gameStore';
+import magicIcon from '../../assets/water-fire-sprite-magic/Icons/PNG/Icons_Fire Spell.webp';
+import waterIcon from '../../assets/water-fire-sprite-magic/Icons/PNG/Icons_Water Spell.webp';
+import swordIcon from '../../assets/water-fire-sprite-magic/Icons/PNG/Icons_Fire Arrow.webp';
+import shieldImg from '../../assets/underwater/Bonus/Shield.webp';
+import heartImg from '../../assets/underwater/Bonus/Heart.webp';
 import arenaBg from '../../assets/arena_background.webp';
 
 interface SettingsScreenProps {
   storeData: GameStoreData;
-  onDataChange: (data: GameStoreData) => void;
   onBack: () => void;
+  onDataChange: (data: GameStoreData) => void;
   onResetComplete: () => void;
 }
 
 export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   storeData,
-  onDataChange,
   onBack,
+  onDataChange,
   onResetComplete,
 }) => {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const settings = storeData.settings;
 
-  const handleToggle = (key: 'vibration') => {
-    onDataChange(updateSettings(storeData, { [key]: !settings[key] }));
+  const handleToggle = (key: 'musicEnabled' | 'sfxEnabled' | 'vibrationEnabled') => {
+    const updated = updateSettings(storeData, { [key]: !settings[key] });
+    saveGameData(updated);
+    onDataChange(updated);
   };
 
-  const handleVolume = (key: 'musicVolume' | 'sfxVolume', val: number) => {
-    onDataChange(updateSettings(storeData, { [key]: val }));
-  };
-
-  const handleLang = (lang: 'en' | 'id' | 'zh') => {
-    onDataChange(updateSettings(storeData, { language: lang }));
+  const handleLanguage = (lang: 'id' | 'en' | 'zh') => {
+    const updated = updateSettings(storeData, { language: lang });
+    saveGameData(updated);
+    onDataChange(updated);
   };
 
   const handleReset = () => {
-    resetAllProgress();
+    const fresh = resetAllProgress();
+    onDataChange(fresh);
     onResetComplete();
   };
+
+  const langOptions = [
+    { code: 'en' as const, label: 'English', icon: '🇺🇸' },
+    { code: 'id' as const, label: 'Bahasa', icon: '🇮🇩' },
+    { code: 'zh' as const, label: '中文', icon: '🇨🇳' },
+  ];
 
   return (
     <div className="absolute inset-0 z-50 flex flex-col overflow-hidden"
@@ -46,153 +58,178 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         paddingBottom: 'max(8px, env(safe-area-inset-bottom, 8px))',
       }}
     >
-      <div className="absolute inset-0 bg-black/50 pointer-events-none" />
-      {/* Header */}
-      <div className="relative z-10 flex items-center gap-3 px-4 py-2 mx-2 mb-2 rounded-2xl"
+      <div className="absolute inset-0 bg-black/45 pointer-events-none" />
+
+      {/* ── Header ── */}
+      <div className="relative z-10 flex items-center gap-2 px-3 py-2 mx-2 mb-2"
         style={{
-          background: 'rgba(0,0,0,0.5)',
-          border: '1px solid rgba(255,215,0,0.15)',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.4)',
+          background: 'linear-gradient(180deg, rgba(62,40,20,0.92) 0%, rgba(40,26,12,0.95) 100%)',
+          borderRadius: '12px',
+          border: '2px solid rgba(180,140,60,0.5)',
+          boxShadow: '0 3px 10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,215,0,0.15)',
         }}
       >
-        <button onClick={onBack} className="w-8 h-8 rounded-xl flex items-center justify-center transition active:scale-90"
-          style={{ background: 'rgba(255,215,0,0.08)', border: '1px solid rgba(255,215,0,0.15)' }}
+        <button onClick={onBack}
+          className="w-8 h-8 rounded-lg flex items-center justify-center transition active:scale-90"
+          style={{
+            background: 'linear-gradient(180deg, rgba(80,50,20,0.8) 0%, rgba(50,30,10,0.9) 100%)',
+            border: '1px solid rgba(180,140,60,0.4)',
+          }}
         >
-          <span className="text-sm">←</span>
+          <span className="text-amber-400 text-lg font-black">‹</span>
         </button>
-        <div className="flex-1 text-center">
-          <span className="text-xs font-black uppercase tracking-[0.25em] text-amber-400">⚙️ Settings</span>
+        <div className="flex items-center gap-2 flex-1">
+          <img src={magicIcon} alt="" className="w-6 h-6" style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.4))' }} />
+          <h1 className="text-sm font-black text-amber-100 tracking-wide"
+            style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}
+          >SETTINGS</h1>
         </div>
-        <div className="w-8" />
       </div>
 
-      <div className="relative z-10 flex-1 min-h-0 overflow-y-auto px-4 space-y-3 pb-4">
-        {/* Audio */}
-        <Section title="🎵 Audio">
-          <SliderRow label="Music" value={settings.musicVolume} onChange={(v) => handleVolume('musicVolume', v)} />
-          <SliderRow label="SFX" value={settings.sfxVolume} onChange={(v) => handleVolume('sfxVolume', v)} />
-        </Section>
+      {/* ── Content ── */}
+      <div className="relative z-10 flex-1 overflow-y-auto px-3 pb-4 space-y-2.5">
 
-        {/* Controls */}
-        <Section title="🎮 Controls">
-          <ToggleRow label="Vibration" enabled={settings.vibration} onToggle={() => handleToggle('vibration')} />
-        </Section>
+        {/* ─ Audio Section ─ */}
+        <SettingsSection title="Audio" icon={waterIcon}>
+          <ToggleRow icon={heartImg} label="Music" value={settings.musicEnabled} onChange={() => handleToggle('musicEnabled')} />
+          <ToggleRow icon={swordIcon} label="Sound FX" value={settings.sfxEnabled} onChange={() => handleToggle('sfxEnabled')} />
+          <ToggleRow icon={shieldImg} label="Vibration" value={settings.vibrationEnabled} onChange={() => handleToggle('vibrationEnabled')} />
+        </SettingsSection>
 
-        {/* Language */}
-        <Section title="🌐 Language">
-          <div className="flex gap-2 flex-wrap">
-            {([
-              { code: 'en' as const, label: '🇬🇧 English' },
-              { code: 'id' as const, label: '🇮🇩 Bahasa' },
-              { code: 'zh' as const, label: '🇨🇳 中文' },
-            ]).map((lang) => (
-              <button key={lang.code} onClick={() => handleLang(lang.code)}
-                className="rounded-xl px-3 py-2 text-xs font-bold transition"
+        {/* ─ Language Section ─ */}
+        <SettingsSection title="Language" icon={magicIcon}>
+          <div className="grid grid-cols-3 gap-1.5">
+            {langOptions.map(lang => (
+              <button key={lang.code}
+                onClick={() => handleLanguage(lang.code)}
+                className="py-2 rounded-lg text-center transition"
                 style={{
                   background: settings.language === lang.code
-                    ? 'rgba(245,158,11,0.12)'
+                    ? 'linear-gradient(180deg, rgba(180,140,60,0.2) 0%, rgba(62,40,20,0.8) 100%)'
                     : 'rgba(0,0,0,0.2)',
-                  border: settings.language === lang.code
-                    ? '1px solid rgba(255,215,0,0.25)'
-                    : '1px solid rgba(255,215,0,0.06)',
-                  color: settings.language === lang.code ? '#fbbf24' : '#a78bfa',
+                  border: `1.5px solid ${settings.language === lang.code ? 'rgba(180,140,60,0.5)' : 'rgba(80,60,30,0.2)'}`,
+                  boxShadow: settings.language === lang.code ? 'inset 0 1px 0 rgba(255,215,0,0.1)' : 'none',
                 }}
-              >{lang.label}</button>
+              >
+                <p className="text-lg">{lang.icon}</p>
+                <p className={`text-[9px] font-bold ${settings.language === lang.code ? 'text-amber-300' : 'text-amber-700'}`}>{lang.label}</p>
+              </button>
             ))}
           </div>
-        </Section>
+        </SettingsSection>
 
-        {/* About */}
-        <Section title="ℹ️ About">
-          <div className="text-xs text-purple-300/70 space-y-1">
-            <p>Dimsum Collector v1.0</p>
-            <p>Collect dimsum, earn tickets, open mystery boxes!</p>
-            <p className="text-purple-400/40 text-[10px]">Made with ❤️</p>
+        {/* ─ About Section ─ */}
+        <SettingsSection title="About" icon={shieldImg}>
+          <div className="space-y-1">
+            <InfoRow label="Version" value="1.0.0" />
+            <InfoRow label="Engine" value="React + Canvas" />
+            <InfoRow label="Made with" value="❤️ Dimsum Quest" />
           </div>
-        </Section>
+        </SettingsSection>
 
-        {/* Danger Zone */}
-        <Section title="⚠️ Danger Zone" variant="danger">
-          {!showResetConfirm ? (
-            <button onClick={() => setShowResetConfirm(true)}
-              className="w-full rounded-xl py-2.5 text-xs font-black uppercase tracking-wider text-red-400 transition"
-              style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)' }}
-            >🗑 Reset All Progress</button>
-          ) : (
-            <div className="space-y-2">
-              <div className="rounded-xl p-3"
-                style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)' }}
-              >
-                <p className="text-xs text-red-400 font-bold mb-1">⚠ Are you sure?</p>
-                <p className="text-[10px] text-red-400/60">This will delete all progress, dimsum, tickets, and rewards. Cannot be undone!</p>
+        {/* ─ Danger Zone ─ */}
+        <div className="rounded-xl overflow-hidden"
+          style={{
+            background: 'linear-gradient(135deg, rgba(50,15,15,0.85) 0%, rgba(30,10,10,0.9) 100%)',
+            border: '2px solid rgba(220,38,38,0.25)',
+          }}
+        >
+          <div className="flex items-center gap-2 px-3 py-2"
+            style={{ background: 'rgba(220,38,38,0.08)', borderBottom: '1px solid rgba(220,38,38,0.15)' }}
+          >
+            <span className="text-sm">⚠️</span>
+            <span className="text-[10px] font-black text-red-400/70 uppercase tracking-wider">Danger Zone</span>
+          </div>
+          <div className="p-3">
+            <p className="text-[10px] text-red-400/50 mb-2">This will permanently delete all your progress, items, and rewards.</p>
+            {!showResetConfirm ? (
+              <button onClick={() => setShowResetConfirm(true)}
+                className="w-full py-2.5 rounded-lg text-xs font-bold transition active:scale-[0.97]"
+                style={{
+                  background: 'rgba(220,38,38,0.15)',
+                  border: '1px solid rgba(220,38,38,0.3)',
+                  color: '#f87171',
+                }}
+              >Reset All Progress</button>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-[10px] font-bold text-red-400 text-center">Are you sure? This cannot be undone!</p>
+                <div className="flex gap-2">
+                  <button onClick={() => setShowResetConfirm(false)}
+                    className="flex-1 py-2 rounded-lg text-xs font-bold"
+                    style={{
+                      background: 'rgba(80,50,20,0.6)',
+                      border: '1px solid rgba(180,140,60,0.3)',
+                      color: '#d4a547',
+                    }}
+                  >Cancel</button>
+                  <button onClick={handleReset}
+                    className="flex-1 py-2 rounded-lg text-xs font-bold"
+                    style={{
+                      background: 'linear-gradient(180deg, #dc2626, #991b1b)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      color: '#fecaca',
+                    }}
+                  >Yes, Reset</button>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <button onClick={() => setShowResetConfirm(false)}
-                  className="flex-1 rounded-xl py-2 text-xs font-bold text-purple-300 transition"
-                  style={{
-                    background: 'rgba(0,0,0,0.35)',
-                    border: '1px solid rgba(255,215,0,0.1)',
-                  }}
-                >Cancel</button>
-                <button onClick={handleReset}
-                  className="flex-1 rounded-xl py-2 text-xs font-black text-white transition"
-                  style={{ background: 'linear-gradient(180deg, #dc2626, #b91c1c)' }}
-                >Delete Everything</button>
-              </div>
-            </div>
-          )}
-        </Section>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-/* ─── Helpers ─────────────────────────────────────────────────────────── */
+/* ─── Sub Components ─────────────────────────────────────────────────────── */
 
-const Section: React.FC<{ title: string; variant?: 'danger'; children: React.ReactNode }> = ({ title, variant, children }) => (
-  <div className="rounded-2xl p-4"
+const SettingsSection: React.FC<{ title: string; icon: string; children: React.ReactNode }> = ({ title, icon, children }) => (
+  <div className="rounded-xl overflow-hidden"
     style={{
-      background: 'rgba(0,0,0,0.4)',
-      border: variant === 'danger' ? '1px solid rgba(239,68,68,0.12)' : '1px solid rgba(255,215,0,0.12)',
+      background: 'linear-gradient(135deg, rgba(62,40,20,0.85) 0%, rgba(40,26,12,0.9) 100%)',
+      border: '2px solid rgba(180,140,60,0.25)',
     }}
   >
-    <div className={`text-[10px] font-bold uppercase tracking-[0.25em] mb-3 ${
-      variant === 'danger' ? 'text-red-400/60' : 'text-amber-400/60'
-    }`}>{title}</div>
-    {children}
-  </div>
-);
-
-const SliderRow: React.FC<{ label: string; value: number; onChange: (v: number) => void }> = ({ label, value, onChange }) => (
-  <div className="flex items-center gap-3 mb-3 last:mb-0">
-    <span className="text-xs font-bold text-purple-200 w-12">{label}</span>
-    <div className="flex-1 relative">
-      <input type="range" min={0} max={100} value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-2 rounded-full appearance-none cursor-pointer"
-        style={{
-          background: `linear-gradient(90deg, #f59e0b ${value}%, rgba(255,255,255,0.08) ${value}%)`,
-        }}
-      />
+    <div className="flex items-center gap-2 px-3 py-2"
+      style={{ background: 'rgba(180,140,60,0.1)', borderBottom: '1px solid rgba(180,140,60,0.15)' }}
+    >
+      <img src={icon} alt="" className="w-4 h-4" />
+      <span className="text-[10px] font-black text-amber-400 uppercase tracking-wider">{title}</span>
     </div>
-    <span className="text-[10px] font-bold text-purple-400 w-8 text-right">{value}%</span>
+    <div className="p-3">{children}</div>
   </div>
 );
 
-const ToggleRow: React.FC<{ label: string; enabled: boolean; onToggle: () => void }> = ({ label, enabled, onToggle }) => (
-  <button onClick={onToggle} className="flex items-center w-full gap-3 group">
-    <span className="text-xs font-bold text-purple-200 flex-1 text-left">{label}</span>
-    <div className="w-11 h-6 rounded-full transition flex items-center px-0.5"
+const ToggleRow: React.FC<{ icon: string; label: string; value: boolean; onChange: () => void }> = ({ icon, label, value, onChange }) => (
+  <div className="flex items-center justify-between py-1.5">
+    <div className="flex items-center gap-2">
+      <img src={icon} alt="" className="w-4 h-4" style={{ filter: value ? 'brightness(1.2)' : 'brightness(0.5) grayscale(0.5)' }} />
+      <span className="text-xs text-amber-300">{label}</span>
+    </div>
+    <button onClick={onChange} className="relative w-10 h-5 rounded-full transition-all"
       style={{
-        background: enabled
-          ? 'linear-gradient(90deg, #f59e0b, #fbbf24)'
-          : 'rgba(255,255,255,0.08)',
-        border: enabled ? '1px solid rgba(255,215,0,0.3)' : '1px solid rgba(255,255,255,0.1)',
+        background: value
+          ? 'linear-gradient(90deg, #b45309, #f59e0b)'
+          : 'rgba(0,0,0,0.4)',
+        border: `1px solid ${value ? 'rgba(251,191,36,0.3)' : 'rgba(80,60,30,0.3)'}`,
       }}
     >
-      <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${enabled ? 'translate-x-5' : 'translate-x-0'}`}
-        style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.3)' }}
+      <div className="absolute top-0.5 w-4 h-4 rounded-full transition-all"
+        style={{
+          left: value ? '22px' : '2px',
+          background: value ? '#fef3c7' : 'rgba(180,140,60,0.4)',
+          boxShadow: value ? '0 0 6px rgba(251,191,36,0.3)' : 'none',
+        }}
       />
-    </div>
-  </button>
+    </button>
+  </div>
+);
+
+const InfoRow: React.FC<{ label: string; value: string }> = ({ label, value }) => (
+  <div className="flex items-center justify-between px-2 py-1.5 rounded-lg"
+    style={{ background: 'rgba(0,0,0,0.15)' }}
+  >
+    <span className="text-[10px] text-amber-500/60">{label}</span>
+    <span className="text-[10px] font-bold text-amber-300">{value}</span>
+  </div>
 );

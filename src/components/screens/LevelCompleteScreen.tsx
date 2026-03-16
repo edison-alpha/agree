@@ -3,7 +3,11 @@ import { calculateStars } from '../../store/gameStore';
 import type { LevelConfig } from '../../constants/levels';
 import dimsumImg from '../../assets/dimsum.png';
 import crownImg from '../../assets/underwater/Bonus/Crown.webp';
-import chestOpen from '../../assets/underwater/Neutral/æhest_open.webp';
+import coinImg from '../../assets/underwater/Bonus/Coin.webp';
+import chestClosed from '../../assets/underwater/Neutral/æhest_closed.webp';
+import shieldImg from '../../assets/underwater/Bonus/Shield.webp';
+import heartImg from '../../assets/underwater/Bonus/Heart.webp';
+import swordIcon from '../../assets/water-fire-sprite-magic/Icons/PNG/Icons_Fire Arrow.webp';
 import arenaBg from '../../assets/arena_background.webp';
 
 interface LevelCompleteScreenProps {
@@ -30,182 +34,219 @@ export const LevelCompleteScreen: React.FC<LevelCompleteScreenProps> = ({
   hasNextLevel,
 }) => {
   const stars = calculateStars(dimsumCollected, levelConfig.dimsumCount);
-  const isNewBest = dimsumCollected > previousBest;
-  const isPerfect = dimsumCollected === levelConfig.dimsumCount;
-  const mins = Math.floor(timeTaken / 60);
-  const secs = timeTaken % 60;
-
-  const [showStars, setShowStars] = useState(0);
+  const [revealedStars, setRevealedStars] = useState(0);
   const [showContent, setShowContent] = useState(false);
+  const [showTicket, setShowTicket] = useState(false);
+  const isNewBest = timeTaken < previousBest || previousBest === 0;
+  const isPerfect = dimsumCollected === levelConfig.dimsumCount;
 
   useEffect(() => {
-    const timers: number[] = [];
+    const timers: ReturnType<typeof setTimeout>[] = [];
     for (let i = 1; i <= stars; i++) {
-      timers.push(window.setTimeout(() => setShowStars(i), i * 500));
+      timers.push(setTimeout(() => setRevealedStars(i), i * 400));
     }
-    timers.push(window.setTimeout(() => setShowContent(true), stars * 500 + 300));
+    timers.push(setTimeout(() => setShowContent(true), stars * 400 + 300));
+    if (ticketEarned) {
+      timers.push(setTimeout(() => setShowTicket(true), stars * 400 + 800));
+    }
     return () => timers.forEach(clearTimeout);
-  }, [stars]);
+  }, [stars, ticketEarned]);
+
+  const formatTime = (s: number) => {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return `${m}:${sec.toString().padStart(2, '0')}`;
+  };
 
   return (
-    <div className="absolute inset-0 z-50 flex flex-col overflow-hidden"
+    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center overflow-hidden"
       style={{
         backgroundImage: `url(${arenaBg})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        paddingTop: 'max(12px, env(safe-area-inset-top, 12px))',
-        paddingBottom: 'max(12px, env(safe-area-inset-bottom, 12px))',
       }}
     >
       <div className="absolute inset-0 bg-black/50 pointer-events-none" />
-      <div className="relative z-10 flex-1 flex flex-col items-center px-4 overflow-y-auto sm:mx-auto sm:max-w-2xl">
-        {/* Title */}
-        <div className="text-center mt-6 mb-3 flex-shrink-0">
-          {isPerfect && <img src={crownImg} alt="" className="mx-auto h-8 w-8 mb-1" style={{ filter: 'drop-shadow(0 2px 8px rgba(255,215,0,0.4))' }} />}
-          <div className="text-[10px] font-bold uppercase tracking-[0.35em] mb-1"
-            style={{ color: isPerfect ? '#fbbf24' : '#a78bfa' }}
-          >
-            {isPerfect ? '⭐ PERFECT CLEAR ⭐' : 'Level Complete'}
+
+      <div className="relative z-10 w-full max-w-xs px-4 flex flex-col items-center">
+        {/* Victory Banner */}
+        <div className="w-full rounded-xl p-3 mb-3 text-center relative overflow-hidden"
+          style={{
+            background: 'linear-gradient(135deg, rgba(62,40,20,0.92) 0%, rgba(40,26,12,0.95) 100%)',
+            border: '2px solid rgba(180,140,60,0.5)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,215,0,0.15)',
+          }}
+        >
+          {/* Decorative crown */}
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+            <img src={crownImg} alt="" className="w-10 h-10"
+              style={{ filter: 'drop-shadow(0 2px 6px rgba(251,191,36,0.4))' }}
+            />
           </div>
-          <h1 className="text-2xl font-black text-white">{levelConfig.name}</h1>
-        </div>
 
-        {/* Stars */}
-        <div className="flex items-center gap-4 mb-5 flex-shrink-0">
-          {[1, 2, 3].map((s) => (
-            <div key={s} className="transition-all duration-500"
-              style={{
-                transform: showStars >= s ? 'scale(1) rotate(0deg)' : 'scale(0.3) rotate(-30deg)',
-                opacity: showStars >= s ? 1 : 0.15,
-              }}
-            >
-              <span className="text-4xl" style={{
-                filter: showStars >= s ? 'drop-shadow(0 0 10px rgba(255,215,0,0.6))' : 'grayscale(1)',
-              }}>⭐</span>
-            </div>
-          ))}
-        </div>
+          <p className="text-[10px] font-bold text-amber-500/60 uppercase tracking-widest mt-3">Stage Complete</p>
+          <h2 className="text-lg font-black text-amber-100 mt-0.5"
+            style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}
+          >{levelConfig.name}</h2>
 
-        {/* Content (fades in after stars) */}
-        <div className={`w-full space-y-3 transition-all duration-600 ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-          {/* Dimsum Collected Card */}
-          <div className="rounded-2xl p-4 relative overflow-hidden"
-            style={{
-              background: 'rgba(0,0,0,0.45)',
-              border: '1px solid rgba(255,215,0,0.2)',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-            }}
-          >
-            <div className="text-[10px] font-bold text-amber-400/60 uppercase tracking-wider mb-2 text-center">
-              Dimsum Collected
-            </div>
-            <div className="flex items-center justify-center flex-wrap gap-1.5 mb-2">
-              {Array.from({ length: levelConfig.dimsumCount }).map((_, i) => (
-                <div key={i} className="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
+          {/* Animated Stars */}
+          <div className="flex items-center justify-center gap-2 my-3">
+            {[1, 2, 3].map(s => (
+              <div key={s}
+                className="transition-all duration-500"
+                style={{
+                  transform: revealedStars >= s ? 'scale(1) rotate(0deg)' : 'scale(0) rotate(-180deg)',
+                  opacity: revealedStars >= s ? 1 : 0.2,
+                }}
+              >
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                  revealedStars >= s ? '' : ''
+                }`}
                   style={{
-                    background: i < dimsumCollected
-                      ? 'rgba(245,158,11,0.12)'
-                      : 'rgba(255,255,255,0.02)',
-                    border: i < dimsumCollected
-                      ? '1px solid rgba(255,215,0,0.25)'
-                      : '1px solid rgba(255,215,0,0.06)',
-                    boxShadow: i < dimsumCollected ? '0 0 8px rgba(245,158,11,0.1)' : 'none',
+                    background: revealedStars >= s
+                      ? 'linear-gradient(180deg, rgba(251,191,36,0.2), rgba(180,140,60,0.15))'
+                      : 'rgba(0,0,0,0.2)',
+                    border: `2px solid ${revealedStars >= s ? 'rgba(251,191,36,0.4)' : 'rgba(80,60,30,0.2)'}`,
+                    boxShadow: revealedStars >= s ? '0 0 12px rgba(251,191,36,0.2)' : 'none',
                   }}
                 >
-                  <img src={dimsumImg} alt="" className={`h-5 w-5 transition ${i < dimsumCollected ? '' : 'opacity-15 grayscale'}`} />
+                  <span className="text-xl">{revealedStars >= s ? '⭐' : '☆'}</span>
                 </div>
-              ))}
-            </div>
-            <div className="text-center">
-              <span className="text-3xl font-black text-amber-400">{dimsumCollected}</span>
-              <span className="text-lg font-black text-purple-400"> / {levelConfig.dimsumCount}</span>
-            </div>
+              </div>
+            ))}
           </div>
 
-          {/* Stats Row */}
-          <div className="grid grid-cols-2 gap-2">
-            <div className="rounded-xl p-3 text-center"
+          {isPerfect && (
+            <div className="px-3 py-1 rounded-full inline-flex items-center gap-1"
               style={{
-                background: 'rgba(0,0,0,0.35)',
-                border: '1px solid rgba(255,215,0,0.1)',
+                background: 'rgba(16,185,129,0.15)',
+                border: '1px solid rgba(16,185,129,0.3)',
               }}
             >
-              <div className="text-base font-black text-white">{mins > 0 ? `${mins}m ` : ''}{secs}s</div>
-              <div className="text-[8px] font-bold text-purple-400 uppercase tracking-wider">Time</div>
-            </div>
-            <div className="rounded-xl p-3 text-center"
-              style={{
-                background: 'rgba(0,0,0,0.35)',
-                border: '1px solid rgba(255,215,0,0.1)',
-              }}
-            >
-              <div className="text-base font-black text-amber-400">{stars}/3</div>
-              <div className="text-[8px] font-bold text-purple-400 uppercase tracking-wider">Stars</div>
-            </div>
-          </div>
-
-          {/* Achievement Badges */}
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            {isNewBest && (
-              <div className="rounded-xl px-3 py-1.5"
-                style={{ background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.2)' }}
-              >
-                <span className="text-[10px] font-black text-green-400">🏆 New Best!</span>
-              </div>
-            )}
-            {ticketEarned && (
-              <div className="rounded-xl px-3 py-1.5 animate-pulse"
-                style={{ background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.25)' }}
-              >
-                <span className="text-[10px] font-black text-purple-400">🎫 Ticket Earned!</span>
-              </div>
-            )}
-            {isPerfect && (
-              <div className="rounded-xl px-3 py-1.5"
-                style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(255,215,0,0.2)' }}
-              >
-                <span className="text-[10px] font-black text-amber-400">✨ All Collected!</span>
-              </div>
-            )}
-          </div>
-
-          {ticketEarned && (
-            <div className="flex items-center justify-center gap-2">
-              <img src={chestOpen} alt="" className="h-8 w-8" style={{ filter: 'drop-shadow(0 2px 6px rgba(168,85,247,0.3))' }} />
-              <span className="text-xs font-bold text-purple-300">Check Mystery Box!</span>
+              <img src={dimsumImg} alt="" className="w-3.5 h-3.5" />
+              <span className="text-[10px] font-bold text-emerald-400">PERFECT COLLECTION!</span>
             </div>
           )}
         </div>
 
-        {/* Buttons */}
-        <div className={`w-full mt-auto pt-4 pb-2 space-y-2 flex-shrink-0 transition-all duration-600 ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+        {/* Stats Panel */}
+        <div className={`w-full rounded-xl overflow-hidden mb-3 transition-all duration-500 ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+          style={{
+            background: 'linear-gradient(135deg, rgba(62,40,20,0.88) 0%, rgba(40,26,12,0.92) 100%)',
+            border: '2px solid rgba(180,140,60,0.3)',
+          }}
+        >
+          <div className="px-3 py-2 flex items-center gap-2"
+            style={{ background: 'rgba(180,140,60,0.1)', borderBottom: '1px solid rgba(180,140,60,0.15)' }}
+          >
+            <img src={coinImg} alt="" className="w-4 h-4" />
+            <span className="text-[10px] font-black text-amber-400 uppercase tracking-wider">Battle Results</span>
+          </div>
+
+          <div className="p-3 space-y-2">
+            {/* Dimsum collected */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <img src={dimsumImg} alt="" className="w-5 h-5" />
+                <span className="text-xs text-amber-300">Dimsum</span>
+              </div>
+              <span className={`text-sm font-black ${isPerfect ? 'text-emerald-400' : 'text-amber-300'}`}>
+                {dimsumCollected}/{levelConfig.dimsumCount}
+              </span>
+            </div>
+
+            {/* Time */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <img src={shieldImg} alt="" className="w-5 h-5" />
+                <span className="text-xs text-amber-300">Time</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm font-black text-amber-300">{formatTime(timeTaken)}</span>
+                {isNewBest && previousBest > 0 && (
+                  <span className="text-[8px] font-bold text-emerald-400 px-1 py-0.5 rounded"
+                    style={{ background: 'rgba(16,185,129,0.15)' }}
+                  >NEW!</span>
+                )}
+              </div>
+            </div>
+
+            {/* Stars */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <img src={crownImg} alt="" className="w-5 h-5" />
+                <span className="text-xs text-amber-300">Stars</span>
+              </div>
+              <div className="flex items-center gap-0.5">
+                {[1, 2, 3].map(s => (
+                  <span key={s} className="text-sm">{stars >= s ? '⭐' : '☆'}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Ticket Earned */}
+        {showTicket && (
+          <div className="w-full rounded-xl p-3 mb-3 flex items-center gap-3 animate-bounce"
+            style={{
+              background: 'linear-gradient(135deg, rgba(192,132,252,0.15) 0%, rgba(62,40,20,0.9) 100%)',
+              border: '2px solid rgba(192,132,252,0.3)',
+              boxShadow: '0 0 15px rgba(192,132,252,0.15)',
+            }}
+          >
+            <img src={chestClosed} alt="" className="w-10 h-10"
+              style={{ filter: 'drop-shadow(0 2px 6px rgba(192,132,252,0.3))' }}
+            />
+            <div>
+              <p className="text-xs font-black text-purple-300">Ticket Earned!</p>
+              <p className="text-[9px] text-purple-400/60">Use it to open a Mystery Box</p>
+            </div>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div className={`w-full space-y-2 transition-all duration-500 delay-200 ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
           {hasNextLevel && (
             <button onClick={onNextLevel}
-              className="w-full py-3.5 rounded-2xl text-sm font-black uppercase tracking-widest text-black transition active:scale-[0.97] relative overflow-hidden"
+              className="w-full py-3 rounded-xl text-sm font-black uppercase tracking-wider transition active:scale-[0.97] flex items-center justify-center gap-2"
               style={{
-                background: 'linear-gradient(180deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%)',
-                border: '2px solid rgba(255,255,255,0.2)',
-                boxShadow: '0 4px 20px rgba(245,158,11,0.4), inset 0 2px 0 rgba(255,255,255,0.3)',
+                background: 'linear-gradient(180deg, #b45309 0%, #78350f 100%)',
+                border: '2px solid rgba(251,191,36,0.4)',
+                boxShadow: '0 4px 12px rgba(180,100,10,0.3), inset 0 1px 0 rgba(255,215,0,0.15)',
+                color: '#fef3c7',
+                textShadow: '0 2px 4px rgba(0,0,0,0.5)',
               }}
             >
-              ▶ Next Level
+              <img src={swordIcon} alt="" className="w-5 h-5" style={{ filter: 'brightness(1.4)' }} />
+              Next Stage
             </button>
           )}
+
           <div className="flex gap-2">
             <button onClick={onRetry}
-              className="flex-1 py-3 rounded-2xl text-xs font-black uppercase tracking-wider text-purple-200 transition active:scale-[0.97]"
+              className="flex-1 py-2.5 rounded-xl text-xs font-bold transition active:scale-[0.97] flex items-center justify-center gap-1.5"
               style={{
-                background: 'rgba(0,0,0,0.4)',
-                border: '1px solid rgba(255,215,0,0.12)',
+                background: 'linear-gradient(180deg, rgba(80,50,20,0.85) 0%, rgba(50,30,10,0.9) 100%)',
+                border: '2px solid rgba(180,140,60,0.3)',
+                color: '#d4a547',
               }}
-            >🔄 Retry</button>
+            >
+              <img src={heartImg} alt="" className="w-4 h-4" />
+              Retry
+            </button>
+
             <button onClick={onMenu}
-              className="flex-1 py-3 rounded-2xl text-xs font-black uppercase tracking-wider text-purple-200 transition active:scale-[0.97]"
+              className="flex-1 py-2.5 rounded-xl text-xs font-bold transition active:scale-[0.97] flex items-center justify-center gap-1.5"
               style={{
-                background: 'rgba(0,0,0,0.4)',
-                border: '1px solid rgba(255,215,0,0.12)',
+                background: 'linear-gradient(180deg, rgba(80,50,20,0.85) 0%, rgba(50,30,10,0.9) 100%)',
+                border: '2px solid rgba(180,140,60,0.3)',
+                color: '#d4a547',
               }}
-            >🏠 Menu</button>
+            >
+              <img src={shieldImg} alt="" className="w-4 h-4" />
+              Menu
+            </button>
           </div>
         </div>
       </div>

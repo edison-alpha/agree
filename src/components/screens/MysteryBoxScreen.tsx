@@ -1,60 +1,81 @@
 import React, { useState, useEffect } from 'react';
 import type { GameStoreData, MysteryBoxReward } from '../../store/gameStore';
-import { redeemCode } from '../../store/gameStore';
-import chestClosed from '../../assets/underwater/Neutral/æhest_closed.webp';
-import chestOpen from '../../assets/underwater/Neutral/æhest_open.webp';
-import chestAjar from '../../assets/underwater/Neutral/æhest_ajar.webp';
+import { redeemCode, saveGameData } from '../../store/gameStore';
 import dimsumImg from '../../assets/dimsum.png';
+import chestClosed from '../../assets/underwater/Neutral/æhest_closed.webp';
+import chestAjar from '../../assets/underwater/Neutral/æhest_ajar.webp';
+import chestOpen from '../../assets/underwater/Neutral/æhest_open.webp';
 import coinImg from '../../assets/underwater/Bonus/Coin.webp';
+import crownImg from '../../assets/underwater/Bonus/Crown.webp';
 import pearlImg from '../../assets/underwater/Bonus/Pearl.webp';
+import heartImg from '../../assets/underwater/Bonus/Heart.webp';
+import shieldImg from '../../assets/underwater/Bonus/Shield.webp';
 import arenaBg from '../../assets/arena_background.webp';
 
 interface MysteryBoxScreenProps {
   storeData: GameStoreData;
-  onDataChange: (data: GameStoreData) => void;
   onBack: () => void;
+  onDataChange: (data: GameStoreData) => void;
 }
 
 type Phase = 'input' | 'opening' | 'revealed';
 
 export const MysteryBoxScreen: React.FC<MysteryBoxScreenProps> = ({
   storeData,
-  onDataChange,
   onBack,
+  onDataChange,
 }) => {
   const [phase, setPhase] = useState<Phase>('input');
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [reward, setReward] = useState<MysteryBoxReward | null>(null);
-  const [shakeClass, setShakeClass] = useState('');
+  const [chestState, setChestState] = useState<'closed' | 'ajar' | 'open'>('closed');
+  const [showReward, setShowReward] = useState(false);
 
   const handleRedeem = () => {
     setError('');
-    if (!code.trim()) { setError('Enter a redemption code'); return; }
-    if (storeData.tickets < 1) { setError('You need at least 1 ticket!'); return; }
-
-    const redeemResult = redeemCode(storeData, code.trim());
-    if (!redeemResult) {
-      setError('Invalid or already used code');
+    if (!code.trim()) {
+      setError('Enter a redemption code');
+      return;
+    }
+    if (storeData.tickets < 1) {
+      setError('You need at least 1 ticket!');
       return;
     }
 
-    onDataChange(redeemResult.data);
-    setReward(redeemResult.reward);
+    const result = redeemCode(storeData, code.trim());
+    if (!result) {
+      setError('Invalid or already redeemed code');
+      return;
+    }
+
+    // result contains { data, reward } — data already has ticket decremented and reward added
+    saveGameData(result.data);
+    onDataChange(result.data);
+    setReward(result.reward);
     setPhase('opening');
   };
 
+  // Chest opening animation sequence
   useEffect(() => {
-    if (phase === 'opening') {
-      const t = setTimeout(() => setPhase('revealed'), 2800);
-      return () => clearTimeout(t);
-    }
+    if (phase !== 'opening') return;
+    const t1 = setTimeout(() => setChestState('ajar'), 800);
+    const t2 = setTimeout(() => setChestState('open'), 1800);
+    const t3 = setTimeout(() => {
+      setPhase('revealed');
+      setShowReward(true);
+    }, 2500);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, [phase]);
 
-  const handleShake = () => {
-    setShakeClass('animate-shake');
-    setTimeout(() => setShakeClass(''), 600);
+  const rewardIcons: Record<string, string> = {
+    birthday_card: heartImg,
+    inventory_item: shieldImg,
+    dimsum_bonus: dimsumImg,
+    cosmetic: crownImg,
   };
+
+  const chestImages = { closed: chestClosed, ajar: chestAjar, open: chestOpen };
 
   return (
     <div className="absolute inset-0 z-50 flex flex-col overflow-hidden"
@@ -63,240 +84,282 @@ export const MysteryBoxScreen: React.FC<MysteryBoxScreenProps> = ({
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         paddingTop: 'max(8px, env(safe-area-inset-top, 8px))',
-        paddingBottom: 'max(12px, env(safe-area-inset-bottom, 12px))',
+        paddingBottom: 'max(8px, env(safe-area-inset-bottom, 8px))',
       }}
     >
-      <div className="absolute inset-0 bg-black/50 pointer-events-none" />
-      {/* Header */}
-      <div className="relative z-10 flex items-center gap-3 px-4 py-2 mx-2 mb-2 rounded-2xl"
+      <div className="absolute inset-0 bg-black/45 pointer-events-none" />
+
+      {/* ── Header ── */}
+      <div className="relative z-10 flex items-center gap-2 px-3 py-2 mx-2 mb-2"
         style={{
-          background: 'rgba(0,0,0,0.5)',
-          border: '1px solid rgba(255,215,0,0.15)',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.4)',
+          background: 'linear-gradient(180deg, rgba(62,40,20,0.92) 0%, rgba(40,26,12,0.95) 100%)',
+          borderRadius: '12px',
+          border: '2px solid rgba(180,140,60,0.5)',
+          boxShadow: '0 3px 10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,215,0,0.15)',
         }}
       >
-        <button onClick={onBack} className="w-8 h-8 rounded-xl flex items-center justify-center transition active:scale-90"
-          style={{ background: 'rgba(255,215,0,0.08)', border: '1px solid rgba(255,215,0,0.15)' }}
+        <button onClick={onBack}
+          className="w-8 h-8 rounded-lg flex items-center justify-center transition active:scale-90"
+          style={{
+            background: 'linear-gradient(180deg, rgba(80,50,20,0.8) 0%, rgba(50,30,10,0.9) 100%)',
+            border: '1px solid rgba(180,140,60,0.4)',
+          }}
         >
-          <span className="text-sm">←</span>
+          <span className="text-amber-400 text-lg font-black">‹</span>
         </button>
-        <div className="flex-1 flex items-center justify-center gap-2">
-          <img src={chestClosed} alt="" className="w-5 h-5" />
-          <span className="text-xs font-black uppercase tracking-[0.25em] text-amber-400">Mystery Box</span>
+        <div className="flex items-center gap-2 flex-1">
+          <img src={chestClosed} alt="" className="w-6 h-6" style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.4))' }} />
+          <h1 className="text-sm font-black text-amber-100 tracking-wide"
+            style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}
+          >MYSTERY BOX</h1>
         </div>
-        <div className="flex items-center gap-1 px-2 py-0.5 rounded-lg"
-          style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,215,0,0.1)' }}
+        <div className="flex items-center gap-1 rounded-lg px-2 py-1"
+          style={{ background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(180,140,60,0.2)' }}
         >
-          <span className="text-xs">🎫</span>
+          <img src={chestClosed} alt="" className="w-3.5 h-3.5" />
           <span className="text-xs font-black text-amber-400">{storeData.tickets}</span>
         </div>
       </div>
 
-      {/* ── Phase: Input ── */}
-      {phase === 'input' && (
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 overflow-y-auto">
-          {/* Chest Display */}
-          <div className="mb-4">
-            <button onClick={handleShake} className={`transition ${shakeClass}`}>
-              <img src={chestClosed} alt="" className="h-28 w-28" style={{ filter: 'drop-shadow(0 8px 24px rgba(168,85,247,0.4))' }} />
-            </button>
-          </div>
-          <div className="text-[9px] font-bold text-purple-400/60 uppercase tracking-[0.3em] mb-1">Tap the chest!</div>
-          <h2 className="text-xl font-black text-white mb-4">Mystery Box</h2>
+      {/* ── Content ── */}
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4">
+        {phase === 'input' && (
+          <InputPhase
+            code={code}
+            onCodeChange={setCode}
+            error={error}
+            tickets={storeData.tickets}
+            onRedeem={handleRedeem}
+          />
+        )}
 
-          {/* Code Input Panel */}
-          <div className="w-full rounded-2xl p-4"
-            style={{
-              background: 'rgba(0,0,0,0.45)',
-              border: '1px solid rgba(255,215,0,0.2)',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+        {phase === 'opening' && (
+          <OpeningPhase chestImage={chestImages[chestState]} chestState={chestState} />
+        )}
+
+        {phase === 'revealed' && reward && (
+          <RevealedPhase
+            reward={reward}
+            rewardIcon={rewardIcons[reward.type] || pearlImg}
+            showReward={showReward}
+            onClose={() => {
+              setPhase('input');
+              setCode('');
+              setChestState('closed');
+              setShowReward(false);
+              setReward(null);
             }}
-          >
-            <label className="block mb-3">
-              <div className="text-[10px] font-bold text-amber-400/60 uppercase tracking-wider mb-1.5">Redemption Code</div>
-              <input
-                type="text"
-                value={code}
-                onChange={(e) => { setCode(e.target.value.toUpperCase()); setError(''); }}
-                placeholder="ENTER CODE..."
-                className="w-full rounded-xl text-white text-sm font-bold text-center p-3 placeholder-purple-500/50 focus:outline-none transition"
-                style={{
-                  background: 'rgba(0,0,0,0.3)',
-                  border: '1px solid rgba(255,215,0,0.15)',
-                  boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2)',
-                }}
-                maxLength={20}
-              />
-            </label>
-
-            {error && (
-              <div className="rounded-xl px-3 py-2 mb-3 text-center"
-                style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}
-              >
-                <span className="text-xs text-red-400">{error}</span>
-              </div>
-            )}
-
-            <button onClick={handleRedeem} disabled={storeData.tickets < 1}
-              className="w-full py-3.5 rounded-2xl text-sm font-black uppercase tracking-widest text-black transition active:scale-[0.97] disabled:opacity-30 disabled:pointer-events-none relative overflow-hidden"
-              style={{
-                background: 'linear-gradient(180deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%)',
-                border: '2px solid rgba(255,255,255,0.2)',
-                boxShadow: '0 4px 20px rgba(245,158,11,0.4), inset 0 2px 0 rgba(255,255,255,0.3)',
-              }}
-            >🔓 Open Box (1 Ticket)</button>
-          </div>
-
-          {/* Possible Rewards */}
-          <div className="w-full mt-3 rounded-xl p-3"
-            style={{
-              background: 'rgba(0,0,0,0.3)',
-              border: '1px solid rgba(255,215,0,0.08)',
-            }}
-          >
-            <div className="text-[9px] font-bold text-purple-400/50 uppercase tracking-wider mb-2">Possible Rewards</div>
-            <div className="grid grid-cols-2 gap-1.5">
-              {[
-                { img: coinImg, label: 'Birthday Card' },
-                { img: dimsumImg, label: 'Bonus Dimsum' },
-                { img: pearlImg, label: 'Rare Items' },
-                { img: chestClosed, label: 'Cosmetics' },
-              ].map((r) => (
-                <div key={r.label} className="flex items-center gap-2 rounded-lg px-2 py-1.5"
-                  style={{ background: 'rgba(255,215,0,0.03)', border: '1px solid rgba(255,215,0,0.06)' }}
-                >
-                  <img src={r.img} alt="" className="w-4 h-4" />
-                  <span className="text-[9px] text-purple-300/70">{r.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Phase: Opening ── */}
-      {phase === 'opening' && (
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center">
-          <div className="mb-4 relative">
-            <img src={chestAjar} alt="" className="h-32 w-32 animate-pulse"
-              style={{ filter: 'drop-shadow(0 8px 32px rgba(255,215,0,0.4))' }}
-            />
-            {/* Glow ring */}
-            <div className="absolute inset-0 rounded-full animate-ping opacity-20"
-              style={{ background: 'radial-gradient(circle, rgba(255,215,0,0.3), transparent 60%)' }}
-            />
-          </div>
-          <div className="text-lg font-black text-amber-400 animate-pulse">Opening…</div>
-          <div className="mt-3 flex items-center gap-2">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="w-2.5 h-2.5 rounded-full"
-                style={{
-                  background: 'linear-gradient(180deg, #fbbf24, #d97706)',
-                  animation: `dot-pulse 1.2s ease-in-out infinite`,
-                  animationDelay: `${i * 0.2}s`,
-                }}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ── Phase: Revealed ── */}
-      {phase === 'revealed' && reward && (
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 overflow-y-auto">
-          {/* Reward Card */}
-          <div className="w-full max-w-sm rounded-2xl p-6 text-center relative overflow-hidden"
-            style={{
-              background: 'rgba(0,0,0,0.55)',
-              border: '2px solid rgba(255,215,0,0.3)',
-              boxShadow: '0 8px 40px rgba(255,215,0,0.15), 0 0 60px rgba(168,85,247,0.15)',
-            }}
-          >
-            {/* Glow */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-40 -translate-y-1/2 rounded-full opacity-20"
-              style={{ background: 'radial-gradient(circle, rgba(255,215,0,0.5), transparent)' }}
-            />
-
-            <div className="relative">
-              <div className="text-5xl mb-3">{reward.icon}</div>
-              <div className="text-[9px] font-bold text-amber-400/50 uppercase tracking-[0.35em] mb-1">You Got</div>
-              <h2 className="text-xl font-black text-white mb-1">{reward.name}</h2>
-              <p className="text-xs text-purple-300/70 mb-3">{reward.description}</p>
-
-              {/* Birthday Card Message */}
-              {reward.type === 'birthday_card' && reward.message && (
-                <div className="rounded-xl p-4 mb-3 text-left"
-                  style={{
-                    background: 'rgba(219,39,119,0.08)',
-                    border: '1px solid rgba(219,39,119,0.2)',
-                  }}
-                >
-                  <div className="text-2xl text-center mb-2">🎂🎉</div>
-                  <p className="text-sm text-purple-200 leading-relaxed whitespace-pre-wrap">{reward.message}</p>
-                </div>
-              )}
-
-              {/* Dimsum Bonus */}
-              {reward.type === 'dimsum_bonus' && (
-                <div className="inline-flex items-center gap-2 rounded-xl px-5 py-2 mb-2"
-                  style={{
-                    background: 'rgba(245,158,11,0.12)',
-                    border: '1px solid rgba(255,215,0,0.25)',
-                  }}
-                >
-                  <img src={dimsumImg} alt="" className="h-6 w-6" />
-                  <span className="text-xl font-black text-amber-400">+{reward.value ?? 10}</span>
-                </div>
-              )}
-
-              {/* Inventory Item */}
-              {reward.type === 'inventory_item' && (
-                <div className="rounded-xl px-4 py-2 mb-2 inline-block"
-                  style={{
-                    background: 'rgba(255,215,0,0.05)',
-                    border: '1px solid rgba(255,215,0,0.1)',
-                  }}
-                >
-                  <span className="text-[10px] font-bold text-purple-300 uppercase tracking-wider">Added to inventory!</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Open Chest Below */}
-          <div className="mt-3 mb-2">
-            <img src={chestOpen} alt="" className="h-14 w-14 mx-auto" style={{ filter: 'drop-shadow(0 4px 12px rgba(168,85,247,0.3))' }} />
-          </div>
-
-          <p className="text-[10px] text-purple-400/60 mb-3">Tap to continue</p>
-
-          {/* Buttons */}
-          <button onClick={() => { setPhase('input'); setCode(''); setReward(null); }}
-            className="w-full max-w-xs py-3 rounded-2xl text-sm font-black uppercase tracking-widest text-black transition active:scale-[0.97]"
-            style={{
-              background: 'linear-gradient(180deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%)',
-              border: '2px solid rgba(255,255,255,0.2)',
-              boxShadow: '0 4px 20px rgba(245,158,11,0.4), inset 0 2px 0 rgba(255,255,255,0.3)',
-            }}
-          >
-            {storeData.tickets > 0 ? '🎁 Open Another' : '✓ Done'}
-          </button>
-          <button onClick={onBack} className="text-xs text-purple-400 py-2 hover:text-purple-300 transition">
-            Back to menu
-          </button>
-        </div>
-      )}
-
-      <style>{`
-        @keyframes dot-pulse {
-          0%, 100% { opacity: 0.3; transform: scale(0.7); }
-          50% { opacity: 1; transform: scale(1); }
-        }
-        @keyframes shake {
-          0%,100%{transform:translateX(0)} 10%,30%,50%,70%,90%{transform:translateX(-4px)} 20%,40%,60%,80%{transform:translateX(4px)}
-        }
-        .animate-shake { animation: shake 0.6s ease-in-out; }
-      `}</style>
+          />
+        )}
+      </div>
     </div>
   );
 };
+
+/* ─── Input Phase ──────────────────────────────────────────────────────── */
+
+const InputPhase: React.FC<{
+  code: string;
+  onCodeChange: (c: string) => void;
+  error: string;
+  tickets: number;
+  onRedeem: () => void;
+}> = ({ code, onCodeChange, error, tickets, onRedeem }) => (
+  <div className="w-full max-w-xs space-y-4">
+    {/* Chest Display */}
+    <div className="flex flex-col items-center mb-2">
+      <img src={chestClosed} alt="" className="w-24 h-24 mb-3"
+        style={{ filter: 'drop-shadow(0 6px 12px rgba(0,0,0,0.5))', animation: 'chestFloat 2s ease-in-out infinite' }}
+      />
+      <p className="text-sm font-bold text-amber-300 text-center">Enter your code to open!</p>
+      <p className="text-[10px] text-amber-600/60 text-center mt-1">Requires 1 ticket + redemption code</p>
+    </div>
+
+    {/* Ticket Status */}
+    <div className="flex items-center justify-center gap-2 rounded-xl px-4 py-2"
+      style={{
+        background: tickets > 0 ? 'rgba(5,150,105,0.15)' : 'rgba(220,38,38,0.15)',
+        border: `1px solid ${tickets > 0 ? 'rgba(16,185,129,0.3)' : 'rgba(220,38,38,0.3)'}`,
+      }}
+    >
+      <img src={chestClosed} alt="" className="w-5 h-5" />
+      <span className={`text-xs font-bold ${tickets > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+        {tickets > 0 ? `${tickets} ticket${tickets > 1 ? 's' : ''} available` : 'No tickets available'}
+      </span>
+    </div>
+
+    {/* Code Input */}
+    <div className="rounded-xl p-3"
+      style={{
+        background: 'linear-gradient(135deg, rgba(62,40,20,0.85) 0%, rgba(40,26,12,0.9) 100%)',
+        border: '2px solid rgba(180,140,60,0.3)',
+      }}
+    >
+      <label className="text-[9px] font-bold text-amber-500/70 uppercase tracking-wider mb-1.5 block">
+        Redemption Code
+      </label>
+      <input
+        type="text"
+        value={code}
+        onChange={e => onCodeChange(e.target.value.toUpperCase())}
+        placeholder="ENTER CODE..."
+        className="w-full px-3 py-2.5 rounded-lg text-sm font-bold text-amber-200 placeholder-amber-800/40 text-center tracking-[0.2em] outline-none"
+        style={{
+          background: 'rgba(0,0,0,0.4)',
+          border: '1px solid rgba(180,140,60,0.2)',
+        }}
+      />
+      {error && (
+        <p className="text-[10px] text-red-400 text-center mt-2 font-bold">{error}</p>
+      )}
+    </div>
+
+    {/* Redeem Button */}
+    <button onClick={onRedeem}
+      disabled={tickets < 1}
+      className="w-full py-3 rounded-xl text-sm font-black uppercase tracking-widest transition active:scale-[0.97] flex items-center justify-center gap-2"
+      style={{
+        background: tickets > 0
+          ? 'linear-gradient(180deg, #b45309 0%, #78350f 100%)'
+          : 'rgba(60,40,20,0.5)',
+        border: `2px solid ${tickets > 0 ? 'rgba(251,191,36,0.4)' : 'rgba(80,60,30,0.2)'}`,
+        boxShadow: tickets > 0 ? '0 4px 12px rgba(180,100,10,0.3), inset 0 1px 0 rgba(255,215,0,0.15)' : 'none',
+        color: tickets > 0 ? '#fef3c7' : 'rgba(180,140,60,0.3)',
+        textShadow: tickets > 0 ? '0 2px 4px rgba(0,0,0,0.5)' : 'none',
+        opacity: tickets > 0 ? 1 : 0.5,
+      }}
+    >
+      <img src={chestClosed} alt="" className="w-5 h-5" style={{ filter: tickets > 0 ? 'brightness(1.3)' : 'brightness(0.3)' }} />
+      Open Box
+    </button>
+
+    <style>{`
+      @keyframes chestFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+      }
+    `}</style>
+  </div>
+);
+
+/* ─── Opening Phase ────────────────────────────────────────────────────── */
+
+const OpeningPhase: React.FC<{
+  chestImage: string;
+  chestState: string;
+}> = ({ chestImage, chestState }) => (
+  <div className="flex flex-col items-center">
+    {/* Glow behind chest */}
+    <div className="relative">
+      <div className="absolute inset-0 -m-8 rounded-full"
+        style={{
+          background: `radial-gradient(circle, ${
+            chestState === 'open' ? 'rgba(251,191,36,0.3)' : 'rgba(251,191,36,0.1)'
+          }, transparent 70%)`,
+          animation: 'pulse 1.5s ease-in-out infinite',
+        }}
+      />
+      <img src={chestImage} alt=""
+        className="w-32 h-32 relative z-10"
+        style={{
+          filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.6))',
+          animation: chestState === 'ajar' ? 'chestShake 0.3s ease-in-out infinite' : undefined,
+          transform: chestState === 'open' ? 'scale(1.1)' : 'scale(1)',
+          transition: 'transform 0.5s ease-out',
+        }}
+      />
+    </div>
+    <p className="text-sm font-bold text-amber-400 mt-4 animate-pulse"
+      style={{ textShadow: '0 0 8px rgba(251,191,36,0.4)' }}
+    >
+      {chestState === 'closed' ? 'Preparing...' : chestState === 'ajar' ? 'Opening...' : 'Revealing!'}
+    </p>
+    <style>{`
+      @keyframes chestShake {
+        0%, 100% { transform: rotate(-2deg); }
+        50% { transform: rotate(2deg); }
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 1; }
+      }
+    `}</style>
+  </div>
+);
+
+/* ─── Revealed Phase ───────────────────────────────────────────────────── */
+
+const RevealedPhase: React.FC<{
+  reward: MysteryBoxReward;
+  rewardIcon: string;
+  showReward: boolean;
+  onClose: () => void;
+}> = ({ reward, rewardIcon, showReward, onClose }) => (
+  <div className={`flex flex-col items-center w-full max-w-xs transition-all duration-700 ${showReward ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
+    {/* Reward glow */}
+    <div className="relative mb-4">
+      <div className="absolute inset-0 -m-12 rounded-full"
+        style={{
+          background: reward.type === 'birthday_card'
+            ? 'radial-gradient(circle, rgba(192,132,252,0.3), transparent 70%)'
+            : 'radial-gradient(circle, rgba(251,191,36,0.3), transparent 70%)',
+        }}
+      />
+      <div className="relative z-10 w-20 h-20 rounded-2xl flex items-center justify-center"
+        style={{
+          background: 'linear-gradient(135deg, rgba(62,40,20,0.9) 0%, rgba(40,26,12,0.95) 100%)',
+          border: reward.type === 'birthday_card'
+            ? '3px solid rgba(192,132,252,0.5)'
+            : '3px solid rgba(180,140,60,0.5)',
+          boxShadow: `0 0 20px ${reward.type === 'birthday_card' ? 'rgba(192,132,252,0.2)' : 'rgba(180,140,60,0.2)'}`,
+        }}
+      >
+        <img src={rewardIcon} alt="" className="w-12 h-12" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.5))' }} />
+      </div>
+    </div>
+
+    {/* Reward Info */}
+    <div className="w-full rounded-xl p-4 text-center"
+      style={{
+        background: 'linear-gradient(135deg, rgba(62,40,20,0.9) 0%, rgba(40,26,12,0.95) 100%)',
+        border: `2px solid ${reward.type === 'birthday_card' ? 'rgba(192,132,252,0.3)' : 'rgba(180,140,60,0.3)'}`,
+        boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+      }}
+    >
+      <p className="text-[9px] font-bold text-amber-600/60 uppercase tracking-wider mb-1">You received</p>
+      <h3 className="text-base font-black text-amber-200 mb-1" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+        {reward.name}
+      </h3>
+      <p className="text-xs text-amber-500/60">{reward.description}</p>
+
+      {/* Birthday card message */}
+      {reward.message && (
+        <div className="mt-3 rounded-lg px-3 py-2"
+          style={{ background: 'rgba(192,132,252,0.1)', border: '1px solid rgba(192,132,252,0.2)' }}
+        >
+          <p className="text-xs text-purple-300 italic leading-relaxed">"{reward.message}"</p>
+        </div>
+      )}
+
+      {/* Dimsum bonus */}
+      {reward.type === 'dimsum_bonus' && reward.value && (
+        <div className="flex items-center justify-center gap-1.5 mt-3">
+          <img src={dimsumImg} alt="" className="w-5 h-5" />
+          <span className="text-lg font-black text-amber-300">+{reward.value}</span>
+        </div>
+      )}
+    </div>
+
+    {/* Close button */}
+    <button onClick={onClose}
+      className="mt-4 px-8 py-2.5 rounded-xl text-sm font-bold transition active:scale-[0.97]"
+      style={{
+        background: 'linear-gradient(180deg, rgba(80,50,20,0.8) 0%, rgba(50,30,10,0.9) 100%)',
+        border: '2px solid rgba(180,140,60,0.3)',
+        color: '#d4a547',
+      }}
+    >
+      Collect
+    </button>
+  </div>
+);
