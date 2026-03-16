@@ -506,9 +506,8 @@ export function renderFrame(ctx: CanvasRenderingContext2D, state: GameSnapshot, 
   if (time - state.lastDamage < 200 && Math.floor(time / 50) % 2 === 0) ctx.globalAlpha = 0.5;
 
   if (isImageReady(state.images.trooper_character)) {
-    // Player uses front-facing character image (caractertentara/caracterdaster)
-    // Draw centered without rotation for the character portrait style
-    drawCenteredImage(ctx, state.images.trooper_character, px, py, 70, 70);
+    // Player rotates 360° to face the aim/bullet direction
+    drawRotatedImage(ctx, state.images.trooper_character, px, py, 70, 70, state.player.angle);
   } else {
     const playerGrad = ctx.createRadialGradient(px - 5, py - 5, 5, px, py, state.player.radius);
     playerGrad.addColorStop(0, '#60a5fa');
