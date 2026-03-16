@@ -123,7 +123,7 @@ export const TutorialScreen: React.FC<TutorialScreenProps> = ({ onContinue }) =>
         <TutorialCard
           emoji="🏆"
           title="Tujuan"
-          desc="Taklukkan semua 6 level, kumpulkan semua dimsum, raih 3 bintang di setiap level, dan buka semua Mystery Box untuk menjadi juara Dimsum Dash!"
+          desc="Taklukkan semua 6 level, kumpulkan semua dimsum, raih 3 bintang di setiap level, dan buka semua Mystery Box untuk menjadi juara!"
           borderColor="rgba(251,191,36,0.3)"
           bgColor="rgba(251,191,36,0.08)"
           titleColor="text-amber-200"

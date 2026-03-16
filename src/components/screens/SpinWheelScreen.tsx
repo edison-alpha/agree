@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import type { GameStoreData, SpinResult } from '../../store/gameStore';
 import { generateSpinResults, applySpinResults } from '../../store/gameStore';
+import { playClickSound, playSpinStartSound, playSpinTickSound, playWinSound } from '../../utils/uiAudio';
 import arenaBg from '../../assets/arena_background.webp';
 import dimsumImg from '../../assets/dimsum.png';
 import shoesImg from '../../assets/shoes.png';
@@ -224,6 +225,9 @@ export const SpinWheelScreen: React.FC<SpinWheelScreenProps> = ({
     ctx.restore();
   }, []);
 
+  // Track tick sound timing
+  const lastTickAngleRef = useRef(0);
+
   // Animation loop for spinning
   const animateSpin = useCallback(() => {
     if (!isSpinningRef.current) return;
@@ -233,10 +237,20 @@ export const SpinWheelScreen: React.FC<SpinWheelScreenProps> = ({
       rotationRef.current = targetRotationRef.current;
       isSpinningRef.current = false;
       drawWheel(rotationRef.current);
-      // Spin complete → show result
-      setTimeout(() => setPhase('result'), 300);
+      // Win sound + show result
+      playWinSound();
+      setTimeout(() => setPhase('result'), 400);
       return;
     }
+
+    // Play tick sound when passing segment boundaries
+    const currentAngle = rotationRef.current % 360;
+    const segsPassed = Math.floor(currentAngle / SEGMENT_ANGLE);
+    const lastSegsPassed = Math.floor(lastTickAngleRef.current / SEGMENT_ANGLE);
+    if (segsPassed !== lastSegsPassed) {
+      playSpinTickSound();
+    }
+    lastTickAngleRef.current = currentAngle;
 
     // Easing — decelerate smoothly
     rotationRef.current += diff * 0.04;
@@ -250,18 +264,14 @@ export const SpinWheelScreen: React.FC<SpinWheelScreenProps> = ({
     const result = spinResults[currentSpin];
     setCurrentResult(result);
     setPhase('spinning');
+    playSpinStartSound();
 
     // Calculate precise target: the segment should land at the top (pointer position)
-    // Pointer is at top (0°/360°), wheel rotates clockwise
-    // Segment i center is at angle: i * SEGMENT_ANGLE + SEGMENT_ANGLE/2
-    // To land segment at top: rotation needs to be (360 - segmentCenter) + N*360
     const segIdx = SEGMENTS.findIndex(s => s.id === result.prize);
     const segCenter = segIdx * SEGMENT_ANGLE + SEGMENT_ANGLE / 2;
-    // Small random offset within segment for natural feel
     const offset = (Math.random() - 0.5) * (SEGMENT_ANGLE * 0.5);
     const targetAngle = (360 - segCenter + offset + 360) % 360;
 
-    // Add many full rotations for dramatic effect
     const fullSpins = 8 + Math.floor(Math.random() * 4);
     const currentNormalized = rotationRef.current % 360;
     let totalRotation = fullSpins * 360 + targetAngle - currentNormalized;
@@ -269,10 +279,12 @@ export const SpinWheelScreen: React.FC<SpinWheelScreenProps> = ({
 
     targetRotationRef.current = rotationRef.current + totalRotation;
     isSpinningRef.current = true;
+    lastTickAngleRef.current = rotationRef.current % 360;
     animFrameRef.current = requestAnimationFrame(animateSpin);
   }, [currentSpin, spinResults, animateSpin]);
 
   const nextSpin = useCallback(() => {
+    playClickSound();
     const nextIdx = currentSpin + 1;
     setCollectedResults(prev => [...prev, spinResults[currentSpin]]);
     if (nextIdx >= totalSpins) {
@@ -365,7 +377,7 @@ export const SpinWheelScreen: React.FC<SpinWheelScreenProps> = ({
             </div>
 
             {/* Spin Button */}
-            <button onClick={() => setPhase('ready')}
+            <button onClick={() => { playClickSound(); setPhase('ready'); }}
               className="w-full py-4 rounded-xl text-base font-black uppercase tracking-widest transition active:scale-[0.97] relative overflow-hidden flex items-center justify-center gap-2"
               style={{
                 background: 'linear-gradient(180deg, #b45309 0%, #92400e 40%, #78350f 100%)',
